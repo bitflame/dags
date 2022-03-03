@@ -215,7 +215,6 @@ public class AutoGraderTests {
         in = new In("digraph3.txt");
         digraph = new Digraph(in);
         sap = new SAP(digraph);
-
         shortestDistance = sap.length(5, 6);
         if (shortestDistance != 1)
             System.out.printf("Distance between 5 and 6 should be 1, but it is: %d\n", shortestDistance);
@@ -282,8 +281,6 @@ public class AutoGraderTests {
         ancestor = sap.ancestor(10, 3);
         if (ancestor != -1)
             System.out.printf("The value of ancestor between 10 and 3 should be -1, but it is: %d\n", ancestor);
-
-
         ancestor = sap.ancestor(7, 11);
         if (ancestor != 8)
             System.out.printf("The value of ancestor between 7 and 11 should be 8, but it is: %d\n", ancestor);
@@ -308,7 +305,6 @@ public class AutoGraderTests {
         shortestDistance = sap.length(10, 13);
         if (shortestDistance != 4)
             System.out.printf("The distance between 10 and 13 should be 4, but it is: %d\n", shortestDistance);
-
         ancestor = sap.ancestor(13, 12);
         if (ancestor != 12)
             System.out.printf("The value of ancestor between 13 and 12 should be 12, but it is: %d\n", ancestor);
@@ -321,8 +317,30 @@ public class AutoGraderTests {
         shortestDistance = sap.length(13, 11);
         if (shortestDistance != 3)
             System.out.printf("The distance between 13 and 11 should be 3, but it is: %d\n", shortestDistance);
-
-
+        ancestor = sap.ancestor(13, 10);
+        if (ancestor != 11)
+            System.out.printf("The value of ancestor between 13 and 10 should be 11, but it is: %d\n", ancestor);
+        shortestDistance = sap.length(13, 10);
+        if (shortestDistance != 4)
+            System.out.printf("The distance between 13 and 10 should be 4, but it is: %d\n", shortestDistance);
+        ancestor = sap.ancestor(13, 0);
+        if (ancestor != 0)
+            System.out.printf("The value of ancestor between 13 and 0 should be 0, but it is: %d\n", ancestor);
+        shortestDistance = sap.length(13, 0);
+        if (shortestDistance != 2)
+            System.out.printf("The distance between 13 and 0 should be 2, but it is: %d\n", shortestDistance);
+        ancestor = sap.ancestor(13, 14);
+        if (ancestor != 14)
+            System.out.printf("The value of ancestor between 13 and 14 should be 14, but it is: %d\n", ancestor);
+        shortestDistance = sap.length(13, 14);
+        if (shortestDistance != 1)
+            System.out.printf("The distance between 13 and 14 should be 1, but it is: %d\n", shortestDistance);
+        ancestor = sap.ancestor(13, 9);
+        if (ancestor != 11)
+            System.out.printf("The value of ancestor between 13 and 9 should be 11, but it is: %d\n", ancestor);
+        shortestDistance = sap.length(13, 9);
+        if (shortestDistance != 5)
+            System.out.printf("The distance between 13 and 9 should be 5, but it is: %d\n", shortestDistance);
         shortestDistance = sap.length(2, 3);
         if (shortestDistance != 1)
             System.out.printf("The distance between 2 and 3 should be 1, but it is: %d\n", shortestDistance);
@@ -378,7 +396,6 @@ public class AutoGraderTests {
         if (ancestor != 11)
             System.out.printf("The ancestor of 10, and 14 should be node 11, but it is: %d\n ", ancestor);
     }
-
     private void testDigraph4() {
         StdOut.println(
                 "----------------------------------Running AutoGrader Tests for Digraph 4 ----------------------------------");
@@ -401,7 +418,6 @@ public class AutoGraderTests {
         if (shortestDistance != 6)
             System.out.printf("The distance between 9 and 3 should be 6, but it is: %d\n", shortestDistance);
         ancestor = sap.ancestor(9, 3);
-
     }
 
     private void testDigraph5() {
