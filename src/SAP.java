@@ -65,11 +65,11 @@ public class SAP {
             ancestor = -1;
             return minDistance = -1;
         }
-        if (id[v] == id[w] && !hasCircle) {
+        if (!hasCircle && id[v] == id[w]) {
             if (find(v, w) == w) {
                 ancestor = v;
                 minDistance = hops;
-            } else if (find(w, v) == v && !hasCircle) {
+            } else if (!hasCircle && find(w, v) == v) {
                 minDistance = hops;
                 ancestor = w;
             } else {
@@ -156,10 +156,10 @@ public class SAP {
             return ancestor = -1;
         }
         if (id[v] == id[w]) {
-            if (find(v, w) == w && !hasCircle) {
+            if (!hasCircle && find(v, w) == w) {
                 ancestor = v;
                 minDistance = hops;
-            } else if (find(w, v) == v && !hasCircle) {
+            } else if (!hasCircle && find(w, v) == v) {
                 minDistance = hops;
                 ancestor = w;
             } else {
@@ -266,7 +266,6 @@ public class SAP {
                         fromQueue.enqueue(j);
                     } else {
                         if (id[j] == id[f]) {
-
                             if (find(edgeTo[v], t) == t) {
                                 if (currentDistance > DistTo[v] + 1) {
                                     currentAncestor = j;
@@ -315,25 +314,24 @@ public class SAP {
                     } else {
                         if (id[k] == id[t]) {
                             if (find(edgeTo[w], f) == f) {
-                                currentDistance = DistTo[w] + 1;
-                                currentAncestor = k;
-                                break;
+                                if (currentDistance > DistTo[w]+1){
+                                    currentDistance = DistTo[w] + 1;
+                                    currentAncestor = k;
+                                }
                             } else if (find(k, t) == t) {
-                                currentAncestor = k;
+                                currentAncestor = t;
                                 currentDistance = hops;
-                                break;
                             } else if (find(t, k) == t) {
                                 currentDistance = hops;
                                 currentAncestor = t;
-                                break;
+                            } else {
+                                minDistance = -1;
+                                ancestor = -1;
+                                return;
                             }
                             updateDistance(k, w);
                             hasCircle = true;
                             edgeTo[k] = w;
-                            minDistance = -1;
-                            ancestor = -1;
-                            return;
-
                         } else {
                             temp = DistTo[k] + DistTo[w] + 1;
                             if (currentDistance == INFINITY || temp < currentDistance) {
