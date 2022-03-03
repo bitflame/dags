@@ -270,16 +270,13 @@ public class SAP {
                                 if (currentDistance > DistTo[v] + 1) {
                                     currentAncestor = j;
                                     currentDistance = DistTo[v] + 1;
-
                                 }
                             } else if (find(j, f) == f) {
                                 currentAncestor = f;
                                 currentDistance = hops;
-
                             } else if (find(f, j) == f) {
                                 currentDistance = hops;
                                 currentAncestor = f;
-
                             } else {
                                 minDistance = -1;
                                 ancestor = -1;
@@ -314,6 +311,10 @@ public class SAP {
                     } else {
                         if (id[k] == id[t]) {
                             if (find(edgeTo[w], f) == f) {
+                                /* these lines give the wrong answer bc they don't check to see if ancestor is also
+                                * connected to the destination. It fails digraph9's (7, 8) pair. Todo: tomorrow I need
+                                * to check if find() can be used to validate connectivity to destination and if so, then
+                                * use it. */
                                 if (currentDistance > DistTo[w]+1){
                                     currentDistance = DistTo[w] + 1;
                                     currentAncestor = k;
