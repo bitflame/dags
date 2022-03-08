@@ -2,6 +2,7 @@ import edu.princeton.cs.algs4.Queue;
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.Stack;
 
 import java.util.Iterator;
 
@@ -13,13 +14,14 @@ public class SAP {
     private int to;
     private final int n;
     private boolean[] marked;
-    private int hops;
+    private boolean[] onStack;
+    Stack<Integer> cycle;
+    Stack<Integer> postOrder;
     private int[] edgeTo;
     private int[] DistTo;
     private final int[] id;
     private static final int INFINITY = Integer.MAX_VALUE;
     private final boolean print = false;
-    private boolean hasCircle = false;
 
     // constructor takes a digraph ( not necessarily a DAG )
     public SAP(Digraph digraph) {
@@ -30,11 +32,39 @@ public class SAP {
         id = new int[n];
         edgeTo = new int[n];
         DistTo = new int[n];
-        DistTo = new int[n];
+
         for (int i = 0; i < n; i++) {
             id[i] = i;
             edgeTo[i] = i;
         }
+        for (int i = 0; i < n; i++) {
+            if (!marked[i]) dfs(digraphDFCopy, i );
+        }
+    }
+
+    private void dfs(Digraph digraphDFCopy, int v) {
+        marked[v] = true;
+        onStack[v] = true;
+        for (int w : digraphDFCopy.adj(v)) {
+            if (this.hasCycle()) return;
+            else if (!marked[w]){
+                edgeTo[w]=v;
+                dfs(digraphDFCopy, w);
+            } else if (onStack[w]){
+                cycle=new Stack<Integer>();
+                for (int x = v; x !=w ; x=edgeTo[x]) {
+                    cycle.push(x);
+                }
+                cycle.push(w);
+                cycle.push(v);
+            }
+            onStack[v]=false;
+            postOrder.push(v);
+        }
+    }
+
+    private boolean hasCycle() {
+        return cycle != null;
     }
 
     // length of the shortest ancestral path between v and w; -1 if no such path
@@ -195,7 +225,6 @@ public class SAP {
     private int find(int x) {
         while (x != edgeTo[x]) {
             x = edgeTo[x];
-            hops++;
         }
         return x;
     }
@@ -243,9 +272,9 @@ public class SAP {
                         edgeTo[j] = v;
                         fromQueue.enqueue(j);
                     } else {
-                        if (connected(f,t)) {
-                            currentDistance=DistTo[j]+DistTo[v]+1;
-                            currentAncestor=j;
+                        if (connected(f, t)) {
+                            currentDistance = DistTo[j] + DistTo[v] + 1;
+                            currentAncestor = j;
                         } else {
                             edgeTo[j] = v;
                         }
@@ -264,12 +293,13 @@ public class SAP {
                         edgeTo[k] = w;
                         toQueue.enqueue(k);
                     } else {
-                        if (connected(f,t)) {
-                            currentAncestor=k;
-                            currentDistance=DistTo[k]+DistTo[w]+1;
+                        if (connected(f, t)) {
+                            currentAncestor = k;
+                            currentDistance = DistTo[k] + DistTo[w] + 1;
                         } else {
                             edgeTo[k] = w;
                             /* todo -- may have to update id, and DistTo. Also may have to use a stack to detect cycles to prevent updating DistTo for nodes in a cycle */
+                            /* todo -- use the inorder() and postorder() Iterables to get a node from each end until you hit a common node */
                         }
                     }
                 }
