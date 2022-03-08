@@ -5,11 +5,6 @@ import edu.princeton.cs.algs4.In;
 
 import java.util.Iterator;
 
-/**
- * Todo: Nodes with the same ids in a circle should be treated differently for
- * minimum length calculation and ancestor
- */
-
 public class SAP {
     private final Digraph digraphDFCopy;
     private int ancestor;
@@ -65,27 +60,15 @@ public class SAP {
             ancestor = -1;
             return minDistance = -1;
         }
-        if (!hasCircle && id[v] == id[w]) {
-            if (find(v, w) == w) {
-                ancestor = v;
-                minDistance = hops;
-            } else if (!hasCircle && find(w, v) == v) {
-                minDistance = hops;
-                ancestor = w;
-            } else {
-                for (int i = 0; i < n; i++) {
-                    id[i] = i;
-                    edgeTo[i] = i;
-                }
-                lockStepBFS(v, w);
-            }
-
+        if (connected(v, w)) {
+            minDistance = DistTo[v] + DistTo[w];
+            // todo -- Need to test ancestor values
         } else {
             for (int i = 0; i < n; i++) {
                 id[i] = i;
                 edgeTo[i] = i;
             }
-            lockStepBFS(from, to);
+            lockStepBFS(v, w);
         }
         return minDistance;
     }
@@ -155,27 +138,16 @@ public class SAP {
             minDistance = -1;
             return ancestor = -1;
         }
-        if (id[v] == id[w]) {
-            if (!hasCircle && find(v, w) == w) {
-                ancestor = v;
-                minDistance = hops;
-            } else if (!hasCircle && find(w, v) == v) {
-                minDistance = hops;
-                ancestor = w;
-            } else {
-                for (int i = 0; i < n; i++) {
-                    id[i] = i;
-                    edgeTo[i] = i;
-                }
-                lockStepBFS(v, w);
-            }
+        if (connected(v, w)) {
+            minDistance = DistTo[v] + DistTo[w];
         } else {
             for (int i = 0; i < n; i++) {
                 id[i] = i;
                 edgeTo[i] = i;
             }
-            lockStepBFS(from, to);
+            lockStepBFS(v, w);
         }
+
         return ancestor;
     }
 
@@ -220,15 +192,21 @@ public class SAP {
         return ancestor;
     }
 
-    private int find(int x, int y) {
-        hops = 0;
+    private int find(int x) {
         while (x != edgeTo[x]) {
             x = edgeTo[x];
             hops++;
-            if (x == y)
-                return x;
         }
-        return -1;
+        return x;
+    }
+
+    private boolean connected(int v, int w) {
+        int x = find(v);
+        if (x == find(w)) {
+            ancestor = x;
+            return true;
+        }
+        return false;
     }
 
     private void updateDistance(int newNode, int previousNode) {
@@ -265,33 +243,10 @@ public class SAP {
                         edgeTo[j] = v;
                         fromQueue.enqueue(j);
                     } else {
-                        if (id[j] == id[f]) {
-                            if (find(edgeTo[v], t) == t) {
-                                if (currentDistance > DistTo[v] + 1) {
-                                    currentAncestor = j;
-                                    currentDistance = DistTo[v] + 1;
-                                }
-                            } else if (find(j, f) == f) {
-                                currentAncestor = f;
-                                currentDistance = hops;
-                            } else if (find(f, j) == f) {
-                                currentDistance = hops;
-                                currentAncestor = f;
-                            } else {
-                                minDistance = -1;
-                                ancestor = -1;
-                                return;
-                            }
-                            updateDistance(j, v);
-                            hasCircle = true;
-                            edgeTo[j] = v;
+                        if (connected(f,t)) {
+                            currentDistance=DistTo[j]+DistTo[v]+1;
+                            currentAncestor=j;
                         } else {
-                            // if DistTo[j] is larger, change v's id, otherwise change
-                            temp = DistTo[j] + DistTo[v] + 1;
-                            if (currentDistance == INFINITY || temp < currentDistance) {
-                                currentAncestor = j;
-                                currentDistance = temp;
-                            }
                             edgeTo[j] = v;
                         }
                     }
@@ -309,37 +264,12 @@ public class SAP {
                         edgeTo[k] = w;
                         toQueue.enqueue(k);
                     } else {
-                        if (id[k] == id[t]) {
-                            if (find(edgeTo[w], f) == f) {
-                                /* these lines give the wrong answer bc they don't check to see if ancestor is also
-                                * connected to the destination. It fails digraph9's (7, 8) pair. Todo: tomorrow I need
-                                * to check if find() can be used to validate connectivity to destination and if so, then
-                                * use it. */
-                                if (currentDistance > DistTo[w]+1){
-                                    currentDistance = DistTo[w] + 1;
-                                    currentAncestor = k;
-                                }
-                            } else if (find(k, t) == t) {
-                                currentAncestor = t;
-                                currentDistance = hops;
-                            } else if (find(t, k) == t) {
-                                currentDistance = hops;
-                                currentAncestor = t;
-                            } else {
-                                minDistance = -1;
-                                ancestor = -1;
-                                return;
-                            }
-                            updateDistance(k, w);
-                            hasCircle = true;
-                            edgeTo[k] = w;
+                        if (connected(f,t)) {
+                            currentAncestor=k;
+                            currentDistance=DistTo[k]+DistTo[w]+1;
                         } else {
-                            temp = DistTo[k] + DistTo[w] + 1;
-                            if (currentDistance == INFINITY || temp < currentDistance) {
-                                currentAncestor = k;
-                                currentDistance = temp;
-                            }
                             edgeTo[k] = w;
+                            /* todo -- may have to update id, and DistTo. Also may have to use a stack to detect cycles to prevent updating DistTo for nodes in a cycle */
                         }
                     }
                 }
