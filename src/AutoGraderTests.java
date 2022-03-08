@@ -396,6 +396,21 @@ public class AutoGraderTests {
         if (ancestor != 11)
             System.out.printf("The ancestor of 10, and 14 should be node 11, but it is: %d\n ", ancestor);
     }
+
+    private void testDigraph3a() {
+        StdOut.println(
+                "----------------------------------Running AutoGrader Tests for Digraph 3a ----------------------------------");
+        in = new In("digraph3a.txt");
+        digraph = new Digraph(in);
+        sap = new SAP(digraph);
+        shortestDistance = sap.length(8, 13);
+        if (shortestDistance != 6)
+            System.out.printf("The distance between 8 and 13 should be 5, but it is: %d\n", shortestDistance);
+        ancestor = sap.ancestor(8, 13);
+        if (ancestor != 8)
+            System.out.printf("The value of ancestor between 8 and 13 should be 8, but it is: %d\n", ancestor);
+    }
+
     private void testDigraph4() {
         StdOut.println(
                 "----------------------------------Running AutoGrader Tests for Digraph 4 ----------------------------------");
@@ -610,14 +625,15 @@ public class AutoGraderTests {
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
         // autoGraderTests.troubleShooting();
-        autoGraderTests.testDigraphWordNet();
+        // autoGraderTests.testDigraphWordNet();
         autoGraderTests.testDigraph1();
         autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
+        autoGraderTests.testDigraph3a();
         autoGraderTests.testDigraph4();
         autoGraderTests.testDigraph5();
         autoGraderTests.testDigraph6();
-        autoGraderTests.testDigraph9();
+        // autoGraderTests.testDigraph9();
         autoGraderTests.createTwoObjects();
         autoGraderTests.testIterables();
     }
