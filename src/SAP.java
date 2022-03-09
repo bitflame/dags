@@ -19,6 +19,7 @@ public class SAP {
     Stack<Integer> reversePost;
     Queue<Integer> pre;
     Queue<Integer> postOrder;
+    Queue<Integer> bfsQueue = new Queue<>();
     private int[] edgeTo;
     private int[] DistTo;
     private final int[] id;
@@ -42,20 +43,19 @@ public class SAP {
         reversePost = new Stack<Integer>();
         postOrder = new Queue<Integer>();
         for (int i = 0; i < n; i++) {
-            id[i] = i;
-            edgeTo[i] = i;
+            if (!marked[i]) dfs(digraphDFCopy, i);
         }
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
         marked[v] = true;
         onStack[v] = true;
-        id[v] = count;
         pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
             if (this.hasCycle()) return;
             else if (!marked[w]) {
                 edgeTo[w] = v;
+                id[w] = v;
                 dfs(digraphDFCopy, w);
             } else if (onStack[w]) {
                 cycle = new Stack<Integer>();
@@ -71,6 +71,7 @@ public class SAP {
         postOrder.enqueue(v);
     }
 
+
     private boolean stronglyConnected(int v, int w) {
         return id[v] == id[w];
     }
@@ -84,7 +85,11 @@ public class SAP {
     }
 
     private Iterable<Integer> reversePostOrder() {
-        return reversePost;
+        Queue<Integer> temp = new Queue<>();
+        while (!reversePost.isEmpty()) {
+            temp.enqueue(reversePost.pop());
+        }
+        return temp;
     }
 
     private Iterable<Integer> postOrder() {
@@ -118,17 +123,7 @@ public class SAP {
             ancestor = -1;
             return minDistance = -1;
         }
-        if (connected(v, w)) {
-            minDistance = DistTo[v] + DistTo[w];
-            /* todo -- Need to test everything. I do not recall seeing anything about representing a node that does not
-             *   map to any other node vs. a one that does not exist. */
-        } else {
-            for (int i = 0; i < n; i++) {
-                id[i] = i;
-                edgeTo[i] = i;
-            }
-            lockStepBFS(v, w);
-        }
+        lockStepBFS(from, to);
         return minDistance;
     }
 
@@ -197,16 +192,7 @@ public class SAP {
             minDistance = -1;
             return ancestor = -1;
         }
-        if (connected(v, w)) {
-            minDistance = DistTo[v] + DistTo[w];
-        } else {
-            for (int i = 0; i < n; i++) {
-                id[i] = i;
-                edgeTo[i] = i;
-            }
-            lockStepBFS(v, w);
-        }
-
+        lockStepBFS(v, w);
         return ancestor;
     }
 
@@ -252,21 +238,12 @@ public class SAP {
     }
 
     private int find(int x) {
-        hops=0;
+        hops = 0;
         while (x != edgeTo[x]) {
             x = edgeTo[x];
             hops++;
         }
         return x;
-    }
-
-    private boolean connected(int v, int w) {
-        int x = find(v);
-        if (x == find(w)) {
-            ancestor = x;
-            return true;
-        }
-        return false;
     }
 
     private void updateDistance(int newNode, int previousNode) {
@@ -278,24 +255,12 @@ public class SAP {
     }
 
     private void lockStepBFS(int f, int t) {
-        for (int i = f; i <= t; i++) {
-            if (!marked[i]) {
-                dfs(digraphDFCopy, i);
-                count++;
-            }
-        }
-
-        if (stronglyConnected(f, t)) {
-            if (find(t) == f) {
-                ancestor = f;
-                minDistance=hops;
-            } else if (find(f) == t) {
-                ancestor = t;
-                minDistance=hops;
-            }
-        }
-
+        marked = new boolean[n];
+        bfsQueue = new Queue<>();
+        bfs(digraphDFCopy,f);
+        bfs(digraphDFCopy,t);
     }
+
     /* private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
         Queue<Integer> fromQueue = new Queue<>();
@@ -363,6 +328,23 @@ public class SAP {
             ancestor = currentAncestor;
         }
     } */
+    private void bfs(Digraph digraph, int i) {
+        marked[i]=true;
+        bfsQueue.enqueue(i);
+        while (!bfsQueue.isEmpty()) {
+            int v = bfsQueue.dequeue();
+            for (int j : digraph.adj(v)) {
+                if (!marked[j]) {
+                    edgeTo[j]=v;
+                    marked[j]=true;
+                    bfsQueue.enqueue(j);
+                }else {
+                    /* if j is marked, it is likely to be an ancestor, and I can double check  by using stronglyConnected()
+                    * and the rest of the data structures like preorder, postorder, and reversePostorder */
+                }
+            }
+        }
+    }
 
     private boolean testEdgeTo(int ancestor, int destination) {
         // System.out.printf("inside testEdge for " + from + " and " + to);
@@ -381,11 +363,11 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-        Digraph digraph = new Digraph(new In("digraph3.txt"));
+        Digraph digraph = new Digraph(new In("tinyDG.txt"));
         SAP sap = new SAP(digraph);
-        sap.ancestor(1, 2);
+        // System.out.println(sap.ancestor(1, 2));
         /* The following code will print the preorder, postorder,
-        and reverse postorder of any digraph's nodes
+        and reverse postorder of any digraph's nodes*/
         System.out.println("Here is nodes in preorder: ");
         for (int i : sap.preOrder()) {
             System.out.print(" " + i);
@@ -401,8 +383,9 @@ public class SAP {
             System.out.println(" " + k);
         }
         System.out.println("Here are the nodes in the cycle: ");
-        for (int m : sap.cycle()) {
-            System.out.println(" " + m);
-        }*/
+        if (sap.hasCycle())
+            for (int m : sap.cycle()) {
+                System.out.println(" " + m);
+            }
     }
 }
