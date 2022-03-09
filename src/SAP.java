@@ -22,6 +22,8 @@ public class SAP {
     private int[] edgeTo;
     private int[] DistTo;
     private final int[] id;
+    private int count = 0;
+    private int hops = 0;
     private static final int INFINITY = Integer.MAX_VALUE;
     private final boolean print = false;
 
@@ -48,6 +50,7 @@ public class SAP {
     private void dfs(Digraph digraphDFCopy, int v) {
         marked[v] = true;
         onStack[v] = true;
+        id[v] = count;
         pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
             if (this.hasCycle()) return;
@@ -66,6 +69,10 @@ public class SAP {
         onStack[v] = false;
         reversePost.push(v);
         postOrder.enqueue(v);
+    }
+
+    private boolean stronglyConnected(int v, int w) {
+        return id[v] == id[w];
     }
 
     private Iterable<Integer> cycle() {
@@ -245,8 +252,10 @@ public class SAP {
     }
 
     private int find(int x) {
+        hops=0;
         while (x != edgeTo[x]) {
             x = edgeTo[x];
+            hops++;
         }
         return x;
     }
@@ -270,8 +279,22 @@ public class SAP {
 
     private void lockStepBFS(int f, int t) {
         for (int i = f; i <= t; i++) {
-            if (!marked[i]) dfs(digraphDFCopy, i);
+            if (!marked[i]) {
+                dfs(digraphDFCopy, i);
+                count++;
+            }
         }
+
+        if (stronglyConnected(f, t)) {
+            if (find(t) == f) {
+                ancestor = f;
+                minDistance=hops;
+            } else if (find(f) == t) {
+                ancestor = t;
+                minDistance=hops;
+            }
+        }
+
     }
     /* private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
@@ -360,9 +383,9 @@ public class SAP {
     public static void main(String[] args) {
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        sap.ancestor(1,2);
+        sap.ancestor(1, 2);
         /* The following code will print the preorder, postorder,
-        and reverse postorder of any digraph's nodes 
+        and reverse postorder of any digraph's nodes
         System.out.println("Here is nodes in preorder: ");
         for (int i : sap.preOrder()) {
             System.out.print(" " + i);
