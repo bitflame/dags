@@ -18,6 +18,7 @@ public class SAP {
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
     Queue<Integer> pre;
+    Queue<Integer> postOrder;
     private int[] edgeTo;
     private int[] DistTo;
     private final int[] id;
@@ -37,12 +38,10 @@ public class SAP {
         onStack = new boolean[n];
         marked = new boolean[n];
         reversePost = new Stack<Integer>();
+        postOrder = new Queue<Integer>();
         for (int i = 0; i < n; i++) {
             id[i] = i;
             edgeTo[i] = i;
-        }
-        for (int i = 0; i < n; i++) {
-            if (!marked[i]) dfs(digraphDFCopy, i);
         }
     }
 
@@ -66,6 +65,23 @@ public class SAP {
         }
         onStack[v] = false;
         reversePost.push(v);
+        postOrder.enqueue(v);
+    }
+
+    private Iterable<Integer> cycle() {
+        return cycle;
+    }
+
+    private Iterable<Integer> preOrder() {
+        return pre;
+    }
+
+    private Iterable<Integer> reversePostOrder() {
+        return reversePost;
+    }
+
+    private Iterable<Integer> postOrder() {
+        return postOrder;
     }
 
     private boolean hasCycle() {
@@ -98,7 +114,7 @@ public class SAP {
         if (connected(v, w)) {
             minDistance = DistTo[v] + DistTo[w];
             /* todo -- Need to test everything. I do not recall seeing anything about representing a node that does not
-            *   map to any other node vs. a one that does not exist. */
+             *   map to any other node vs. a one that does not exist. */
         } else {
             for (int i = 0; i < n; i++) {
                 id[i] = i;
@@ -253,6 +269,11 @@ public class SAP {
     }
 
     private void lockStepBFS(int f, int t) {
+        for (int i = f; i <= t; i++) {
+            if (!marked[i]) dfs(digraphDFCopy, i);
+        }
+    }
+    /* private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
         Queue<Integer> fromQueue = new Queue<>();
         Queue<Integer> toQueue = new Queue<>();
@@ -304,28 +325,21 @@ public class SAP {
                             currentDistance = DistTo[k] + DistTo[w] + 1;
                         } else {
                             edgeTo[k] = w;
-                            /* todo -- may have to update id, and DistTo. Also may have to use a stack to detect cycles to prevent updating DistTo for nodes in a cycle */
-                            /* todo -- use the inorder() and postorder() Iterables to get a node from each end until you hit a common node */
                         }
                     }
                 }
             }
         }
         if (currentDistance == INFINITY) {
-            // System.out.println("setting minDistance to -1 becuase currentDistance is
-            // INFINITY ");
             minDistance = -1;
             ancestor = -1;
-            // return minDistance;
         } else if (currentAncestor == -1) {
             return;
         } else {
             minDistance = currentDistance;
             ancestor = currentAncestor;
-            // Once I have an ancestor I can update the id of its edgeTos to its id. I think
         }
-        // return currentDistance;
-    }
+    } */
 
     private boolean testEdgeTo(int ancestor, int destination) {
         // System.out.printf("inside testEdge for " + from + " and " + to);
@@ -346,7 +360,26 @@ public class SAP {
     public static void main(String[] args) {
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        System.out.printf("%b\n", sap.testEdgeTo(11, 12));
-        System.out.printf("%b\n", sap.testEdgeTo(11, 8));
+        sap.ancestor(1,2);
+        /* The following code will print the preorder, postorder,
+        and reverse postorder of any digraph's nodes 
+        System.out.println("Here is nodes in preorder: ");
+        for (int i : sap.preOrder()) {
+            System.out.print(" " + i);
+        }
+        System.out.println();
+        System.out.println(" Here are the nodes in post order: ");
+        for (int j : sap.postOrder) {
+            System.out.println(" " + j);
+        }
+        System.out.printf("");
+        System.out.println("Here are the nodes in reverse post order: ");
+        for (int k : sap.reversePost) {
+            System.out.println(" " + k);
+        }
+        System.out.println("Here are the nodes in the cycle: ");
+        for (int m : sap.cycle()) {
+            System.out.println(" " + m);
+        }*/
     }
 }
