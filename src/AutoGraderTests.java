@@ -51,9 +51,6 @@ public class AutoGraderTests {
     private void testSubgraphs() {
         StdOut.println(
                 "--------------------------- Running AutoGrader Tests for SubGraphs ------------------------------");
-        // WordNet wordNet = new WordNet("synsets100-subgraph.txt",
-        // "hypernyms100-subgraph.txt");
-
     }
 
     private void testDigraph1() {

@@ -16,7 +16,8 @@ public class SAP {
     private boolean[] marked;
     private boolean[] onStack;
     Stack<Integer> cycle;
-    Stack<Integer> postOrder;
+    Stack<Integer> reversePost;
+    Queue<Integer> pre;
     private int[] edgeTo;
     private int[] DistTo;
     private final int[] id;
@@ -31,36 +32,40 @@ public class SAP {
         n = digraphDFCopy.V();
         id = new int[n];
         edgeTo = new int[n];
+        pre = new Queue<Integer>();
         DistTo = new int[n];
-
+        onStack = new boolean[n];
+        marked = new boolean[n];
+        reversePost = new Stack<Integer>();
         for (int i = 0; i < n; i++) {
             id[i] = i;
             edgeTo[i] = i;
         }
         for (int i = 0; i < n; i++) {
-            if (!marked[i]) dfs(digraphDFCopy, i );
+            if (!marked[i]) dfs(digraphDFCopy, i);
         }
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
         marked[v] = true;
         onStack[v] = true;
+        pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
             if (this.hasCycle()) return;
-            else if (!marked[w]){
-                edgeTo[w]=v;
+            else if (!marked[w]) {
+                edgeTo[w] = v;
                 dfs(digraphDFCopy, w);
-            } else if (onStack[w]){
-                cycle=new Stack<Integer>();
-                for (int x = v; x !=w ; x=edgeTo[x]) {
+            } else if (onStack[w]) {
+                cycle = new Stack<Integer>();
+                for (int x = v; x != w; x = edgeTo[x]) {
                     cycle.push(x);
                 }
                 cycle.push(w);
                 cycle.push(v);
             }
-            onStack[v]=false;
-            postOrder.push(v);
         }
+        onStack[v] = false;
+        reversePost.push(v);
     }
 
     private boolean hasCycle() {
@@ -92,7 +97,8 @@ public class SAP {
         }
         if (connected(v, w)) {
             minDistance = DistTo[v] + DistTo[w];
-            // todo -- Need to test ancestor values
+            /* todo -- Need to test everything. I do not recall seeing anything about representing a node that does not
+            *   map to any other node vs. a one that does not exist. */
         } else {
             for (int i = 0; i < n; i++) {
                 id[i] = i;
