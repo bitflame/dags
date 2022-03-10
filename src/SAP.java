@@ -282,12 +282,23 @@ public class SAP {
                     reversePost = new Stack<Integer>();
                     postOrder = new Queue<Integer>();
                     dfs(digraphDFCopy, f);
-                    dfs(digraphDFCopy, t);
                     currentDistance = 0;
                     while (reversePost.peek() != ancestor) {
                         reversePost.pop();
                         currentDistance++;
                     }
+                    marked = new boolean[n];
+                    pre = new Queue<Integer>();
+                    reversePost = new Stack<Integer>();
+                    postOrder = new Queue<Integer>();
+                    dfs(digraphDFCopy, t);
+                    int count = 0;
+                    while (reversePost.peek() != ancestor) {
+                        if (reversePost.peek()==f) count=0;
+                        reversePost.pop();
+                        count++;
+                    }
+                    currentDistance+=count;
                     minDistance = currentDistance;
                     return;
                 }
