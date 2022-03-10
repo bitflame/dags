@@ -255,6 +255,7 @@ public class SAP {
     }
 
     private void lockStepBFS(int f, int t) {
+        int currentDistance = INFINITY;
         marked = new boolean[n];
         bfsQueue = new Queue<>();
         marked[f] = true;
@@ -271,14 +272,16 @@ public class SAP {
                     edgeTo[j] = v;
                     marked[j] = true;
                     bfsQueue.enqueue(j);
-                } else {
+                } else if (DistTo[j] + DistTo[v] + 1 < currentDistance) {
                     /* if j is marked, it is likely to be an ancestor, and I can double-check  by using stronglyConnected()
                      * and the rest of the data structures like preorder, postorder, and reversePostorder. If I set ids during
                      * dfs, then I can check to see if a marked node has a different id, and that means it is from the other
                      * end and an ancestor */
+
                     ancestor = j;
-                    minDistance = DistTo[j] + DistTo[v] + 1;
-                }
+                    currentDistance = DistTo[j] + DistTo[v] + 1;
+                    minDistance = currentDistance;
+                } else return;
             }
         }
     }
