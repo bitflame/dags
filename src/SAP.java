@@ -41,6 +41,7 @@ public class SAP {
         onStack[v] = true;
         pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
+            if (w == ancestor) return;
             if (this.hasCycle()) return;
             else if (!marked[w]) {
                 edgeTo[w] = v;
@@ -261,6 +262,7 @@ public class SAP {
         bfsQueue.enqueue(f);
         bfsQueue.enqueue(t);
         int currentDistance = INFINITY;
+        int distance = 0;
         while (!bfsQueue.isEmpty()) {
             int v = bfsQueue.dequeue();
             onStack[v] = true;
@@ -272,38 +274,31 @@ public class SAP {
                     id[j] = id[v];
                     bfsQueue.enqueue(j);
                 } else {
-                    /* if j is marked, it is likely to be an ancestor, and I can double-check  by using stronglyConnected()
-                     * and the rest of the data structures like preorder, postorder, and reversePostorder. If I set ids during
-                     * dfs, then I can check to see if a marked node has a different id, and that means it is from the other
-                     * end and an ancestor */
-                    ancestor = j;
-                    marked = new boolean[n];
-                    pre = new Queue<Integer>();
-                    reversePost = new Stack<Integer>();
-                    postOrder = new Queue<Integer>();
-                    dfs(digraphDFCopy, f);
-                    currentDistance = 0;
-                    while (reversePost.peek() != ancestor) {
-                        reversePost.pop();
-                        currentDistance++;
+                    /* an outgoing edge gives another member of the set. After dfs() edgeTo gives
+                     * path back to source. Try running dfs() again and see if edgeTo gets you to sources every
+                     * time */
+                    if (j == f || j == t) {
+                        minDistance = currentDistance;
+                        return;
                     }
-                    marked = new boolean[n];
-                    pre = new Queue<Integer>();
-                    reversePost = new Stack<Integer>();
-                    postOrder = new Queue<Integer>();
-                    dfs(digraphDFCopy, t);
-                    int count = 0;
-                    while (reversePost.peek() != ancestor) {
-                        if (reversePost.peek()==f) count=0;
-                        reversePost.pop();
-                        count++;
+                    distance = 0;
+                    for (int i = j; i != f && i != t; i = edgeTo[i]) {
+                        distance++;
                     }
-                    currentDistance+=count;
-                    minDistance = currentDistance;
-                    return;
+                    for (int i = v; i != f && i != t; i = edgeTo[i]) {
+                        distance++;
+                    }
+                    if (distance < currentDistance) {
+                        currentDistance = distance + 1;
+                        ancestor = j;
+                    } else {
+                        minDistance = currentDistance;
+                        return;
+                    }
                 }
             }
         }
+        minDistance = currentDistance;
     }
 
     /* private void lockStepBFS(int f, int t) {
