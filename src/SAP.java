@@ -22,7 +22,7 @@ public class SAP {
     Queue<Integer> bfsQueue = new Queue<>();
     private int[] edgeTo;
     private int[] DistTo;
-    private final int[] id;
+    private int[] id;
     private int count = 0;
     private int hops = 0;
     private static final int INFINITY = Integer.MAX_VALUE;
@@ -34,17 +34,6 @@ public class SAP {
             throw new IllegalArgumentException("Digraph value can not be null");
         digraphDFCopy = new Digraph(digraph);
         n = digraphDFCopy.V();
-        id = new int[n];
-        edgeTo = new int[n];
-        pre = new Queue<Integer>();
-        DistTo = new int[n];
-        onStack = new boolean[n];
-        marked = new boolean[n];
-        reversePost = new Stack<Integer>();
-        postOrder = new Queue<Integer>();
-        for (int i = 0; i < n; i++) {
-            if (!marked[i]) dfs(digraphDFCopy, i);
-        }
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
@@ -55,10 +44,10 @@ public class SAP {
             if (this.hasCycle()) return;
             else if (!marked[w]) {
                 edgeTo[w] = v;
-                id[w] = v;
+                id[w] = id[v];
                 dfs(digraphDFCopy, w);
             } else if (onStack[w]) {
-                cycle = new Stack<Integer>();
+                cycle = new Stack<>();
                 for (int x = v; x != w; x = edgeTo[x]) {
                     cycle.push(x);
                 }
@@ -73,7 +62,7 @@ public class SAP {
 
 
     private boolean stronglyConnected(int v, int w) {
-        return id[v] == id[w];
+        return find(v) == find(w);
     }
 
     private Iterable<Integer> cycle() {
@@ -255,7 +244,14 @@ public class SAP {
     }
 
     private void lockStepBFS(int f, int t) {
-        int currentDistance = INFINITY;
+        onStack = new boolean[n];
+        DistTo = new int[n];
+        edgeTo = new int[n];
+        id = new int[n];
+        for (int i = 0; i < n; i++) {
+            id[i] = i;
+            edgeTo[i] = i;
+        }
         marked = new boolean[n];
         bfsQueue = new Queue<>();
         marked[f] = true;
@@ -264,24 +260,37 @@ public class SAP {
         DistTo[t] = 0;
         bfsQueue.enqueue(f);
         bfsQueue.enqueue(t);
+        int currentDistance = INFINITY;
         while (!bfsQueue.isEmpty()) {
             int v = bfsQueue.dequeue();
+            onStack[v] = true;
             for (int j : digraphDFCopy.adj(v)) {
                 if (!marked[j]) {
                     DistTo[j] = DistTo[v] + 1;
                     edgeTo[j] = v;
                     marked[j] = true;
+                    id[j] = id[v];
                     bfsQueue.enqueue(j);
-                } else if (DistTo[j] + DistTo[v] + 1 < currentDistance) {
+                } else {
                     /* if j is marked, it is likely to be an ancestor, and I can double-check  by using stronglyConnected()
                      * and the rest of the data structures like preorder, postorder, and reversePostorder. If I set ids during
                      * dfs, then I can check to see if a marked node has a different id, and that means it is from the other
                      * end and an ancestor */
-
                     ancestor = j;
-                    currentDistance = DistTo[j] + DistTo[v] + 1;
+                    marked = new boolean[n];
+                    pre = new Queue<Integer>();
+                    reversePost = new Stack<Integer>();
+                    postOrder = new Queue<Integer>();
+                    dfs(digraphDFCopy, f);
+                    dfs(digraphDFCopy, t);
+                    currentDistance = 0;
+                    while (reversePost.peek() != ancestor) {
+                        reversePost.pop();
+                        currentDistance++;
+                    }
                     minDistance = currentDistance;
-                } else return;
+                    return;
+                }
             }
         }
     }
