@@ -257,8 +257,30 @@ public class SAP {
     private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
         bfsQueue = new Queue<>();
-        bfs(digraphDFCopy,f);
-        bfs(digraphDFCopy,t);
+        marked[f] = true;
+        marked[t] = true;
+        DistTo[f] = 0;
+        DistTo[t] = 0;
+        bfsQueue.enqueue(f);
+        bfsQueue.enqueue(t);
+        while (!bfsQueue.isEmpty()) {
+            int v = bfsQueue.dequeue();
+            for (int j : digraphDFCopy.adj(v)) {
+                if (!marked[j]) {
+                    DistTo[j] = DistTo[v] + 1;
+                    edgeTo[j] = v;
+                    marked[j] = true;
+                    bfsQueue.enqueue(j);
+                } else {
+                    /* if j is marked, it is likely to be an ancestor, and I can double-check  by using stronglyConnected()
+                     * and the rest of the data structures like preorder, postorder, and reversePostorder. If I set ids during
+                     * dfs, then I can check to see if a marked node has a different id, and that means it is from the other
+                     * end and an ancestor */
+                    ancestor = j;
+                    minDistance = DistTo[j] + DistTo[v] + 1;
+                }
+            }
+        }
     }
 
     /* private void lockStepBFS(int f, int t) {
@@ -328,23 +350,6 @@ public class SAP {
             ancestor = currentAncestor;
         }
     } */
-    private void bfs(Digraph digraph, int i) {
-        marked[i]=true;
-        bfsQueue.enqueue(i);
-        while (!bfsQueue.isEmpty()) {
-            int v = bfsQueue.dequeue();
-            for (int j : digraph.adj(v)) {
-                if (!marked[j]) {
-                    edgeTo[j]=v;
-                    marked[j]=true;
-                    bfsQueue.enqueue(j);
-                }else {
-                    /* if j is marked, it is likely to be an ancestor, and I can double check  by using stronglyConnected()
-                    * and the rest of the data structures like preorder, postorder, and reversePostorder */
-                }
-            }
-        }
-    }
 
     private boolean testEdgeTo(int ancestor, int destination) {
         // System.out.printf("inside testEdge for " + from + " and " + to);
