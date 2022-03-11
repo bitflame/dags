@@ -55,7 +55,7 @@ public class AutoGraderTests {
 
     private void testDigraph1() {
         StdOut.println(
-                "----------------------------------Running AutoGrader Tests for Digraph 1 ----------------------------------");
+                "----------------------------------Running AutoGrader Tests for Digraph 1 ---------------------------");
         in = new In("digraph1.txt");
         digraph = new Digraph(in);
         sap = new SAP(digraph);
