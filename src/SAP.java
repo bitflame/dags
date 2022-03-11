@@ -45,6 +45,7 @@ public class SAP {
             if (this.hasCycle()) return;
             else if (!marked[w]) {
                 edgeTo[w] = v;
+
                 id[w] = id[v];
                 dfs(digraphDFCopy, w);
             } else if (onStack[w]) {
@@ -275,8 +276,12 @@ public class SAP {
                     bfsQueue.enqueue(j);
                 } else {
                     /* an outgoing edge gives another member of the set. After dfs() edgeTo gives
-                     * path back to source. Try running dfs() again and see if edgeTo gets you to sources every
-                     * time */
+                     * path back to source. */
+                    /* use the edges to get the distance. stop when you see the first distance higher than the previous
+                    * one but stop by flushing the queues and let the while loop condition do it. running dfs() from
+                    * each side to the ancestor might be to make sure edgeTo traversal to it works so try running dfs()
+                    * from each side then traverse the edgeTo, and count the hops, then do it for the other node. dfs()
+                    * will also help you deal with cycles better */
                     if (j == f || j == t) {
                         minDistance = currentDistance;
                         return;
