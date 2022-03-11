@@ -34,6 +34,19 @@ public class SAP {
             throw new IllegalArgumentException("Digraph value can not be null");
         digraphDFCopy = new Digraph(digraph);
         n = digraphDFCopy.V();
+        onStack = new boolean[n];
+        DistTo = new int[n];
+        edgeTo = new int[n];
+        id = new int[n];
+        marked = new boolean[n];
+        for (int i = 0; i < n; i++) {
+            edgeTo[i] = i;
+            id[i] = i;
+        }
+        pre = new Queue<>();
+        reversePost = new Stack<>();
+        postOrder = new Queue<>();
+        dfs(digraphDFCopy.reverse(), 0);
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
@@ -41,11 +54,11 @@ public class SAP {
         onStack[v] = true;
         pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
+            edgeTo[w] = v;
+            id[w] = id[v];
+            DistTo[w] = DistTo[v] + 1;
             if (this.hasCycle()) return;
             else if (!marked[w]) {
-                edgeTo[w] = v;
-
-                id[w] = id[v];
                 dfs(digraphDFCopy, w);
             } else if (onStack[w]) {
                 cycle = new Stack<>();
@@ -61,9 +74,8 @@ public class SAP {
         postOrder.enqueue(v);
     }
 
-
     private boolean stronglyConnected(int v, int w) {
-        return find(v) == find(w);
+        return id[v] == id[w];
     }
 
     private Iterable<Integer> cycle() {
@@ -245,74 +257,18 @@ public class SAP {
     }
 
     private void lockStepBFS(int f, int t) {
-        onStack = new boolean[n];
-        DistTo = new int[n];
-        edgeTo = new int[n];
-        id = new int[n];
-        for (int i = 0; i < n; i++) {
-            id[i] = i;
-            edgeTo[i] = i;
-        }
-        marked = new boolean[n];
-        bfsQueue = new Queue<>();
-        marked[f] = true;
-        marked[t] = true;
-        DistTo[f] = 0;
-        DistTo[t] = 0;
-        bfsQueue.enqueue(f);
-        bfsQueue.enqueue(t);
-        int currentDistance = INFINITY;
-        int currentAncestor = -1;
-        int distance = 0;
-        while (!bfsQueue.isEmpty()) {
-            int v = bfsQueue.dequeue();
-            onStack[v] = true;
-            for (int j : digraphDFCopy.adj(v)) {
-                if (!marked[j]) {
-                    DistTo[j] = DistTo[v] + 1;
-                    edgeTo[j] = v;
-                    marked[j] = true;
-                    id[j] = id[v];
-                    bfsQueue.enqueue(j);
-                } else {
-                    /* an outgoing edge gives another member of the set. After dfs() edgeTo gives
-                     * path back to source. */
-                    /* use the edges to get the distance. stop when you see the first distance higher than the previous
-                     * one but stop by flushing the queues and let the while loop condition do it. running dfs() from
-                     * each side to the ancestor might be to make sure edgeTo traversal to it works so try running dfs()
-                     * from each side then traverse the edgeTo, and count the hops, then do it for the other node. dfs()
-                     * will also help you deal with cycles better */
-                    marked = new boolean[n];
-                    onStack = new boolean[n];
-                    pre = new Queue<>();
-                    reversePost = new Stack<>();
-                    postOrder = new Queue<>();
-                    dfs(digraphDFCopy.reverse(), j);
-                    distance = 0;
-                    int counter = pre.dequeue();
-                    while (counter != f && counter != t) {
-                        distance++;
-                        counter = pre.dequeue();
-                    }
-                    counter = reversePost.pop();
-                    while (counter != f && counter != t) {
-                        distance++;
-                        counter = reversePost.pop();
-                    }
-                    if (distance < currentDistance) {
-                        currentDistance = distance;
-                        currentAncestor = j;
-
-                    } else if (distance > currentDistance) {
-                        bfsQueue = new Queue<>();
-                        minDistance = currentDistance;
-                        ancestor = currentAncestor;
-                    }
-                }
+        int v;
+        while (!postOrder.isEmpty() && !reversePost.isEmpty()) {
+            v = postOrder.dequeue();
+            if (stronglyConnected(v, f) && stronglyConnected(v, t)) {
+                ancestor = v;
             }
+            v = reversePost.pop();
+            if (stronglyConnected(v, f) && stronglyConnected(v, t)) {
+                ancestor = v;
+            }
+            minDistance = DistTo[f] + DistTo[t];
         }
-        minDistance = currentDistance;
-        ancestor = currentAncestor;
     }
 
     /* private void lockStepBFS(int f, int t) {
