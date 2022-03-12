@@ -619,8 +619,8 @@ public class AutoGraderTests {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
         // autoGraderTests.troubleShooting();
         // autoGraderTests.testDigraphWordNet();
-        autoGraderTests.testDigraph1();
-        autoGraderTests.testDigraph2();
+        // autoGraderTests.testDigraph1();
+        // autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
         autoGraderTests.testDigraph3a();
         autoGraderTests.testDigraph4();

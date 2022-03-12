@@ -1,8 +1,4 @@
-import edu.princeton.cs.algs4.Queue;
-
-import edu.princeton.cs.algs4.Digraph;
-import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.*;
 
 import java.util.Iterator;
 
@@ -43,16 +39,19 @@ public class SAP {
             edgeTo[i] = i;
             id[i] = i;
         }
-        pre = new Queue<>();
+        //pre = new Queue<>();
         reversePost = new Stack<>();
-        postOrder = new Queue<>();
-        dfs(digraphDFCopy.reverse(), 0);
+        //postOrder = new Queue<>();
+        for (int i = 0; i < n; i++) {
+            dfs(digraphDFCopy, i);
+        }
+        System.out.println("Hi");
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
         marked[v] = true;
         onStack[v] = true;
-        pre.enqueue(v);
+        //pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
             edgeTo[w] = v;
             id[w] = id[v];
@@ -71,8 +70,9 @@ public class SAP {
         }
         onStack[v] = false;
         reversePost.push(v);
-        postOrder.enqueue(v);
+        //postOrder.enqueue(v);
     }
+
 
     private boolean stronglyConnected(int v, int w) {
         return id[v] == id[w];
@@ -256,22 +256,10 @@ public class SAP {
         }
     }
 
-    private void lockStepBFS(int f, int t) {
-        int v;
-        while (!postOrder.isEmpty() && !reversePost.isEmpty()) {
-            v = postOrder.dequeue();
-            if (stronglyConnected(v, f) && stronglyConnected(v, t)) {
-                ancestor = v;
-            }
-            v = reversePost.pop();
-            if (stronglyConnected(v, f) && stronglyConnected(v, t)) {
-                ancestor = v;
-            }
-            minDistance = DistTo[f] + DistTo[t];
-        }
-    }
-
-    /* private void lockStepBFS(int f, int t) {
+    /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
+        nodes with distance 2 and on and on. And use the reversePost to give priority to the vertex that is "smaller" in
+        topological order. I can only assume that it means it is close to the sink, but will have to validate this. */
+    /*private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
         Queue<Integer> fromQueue = new Queue<>();
         Queue<Integer> toQueue = new Queue<>();
@@ -337,7 +325,7 @@ public class SAP {
             minDistance = currentDistance;
             ancestor = currentAncestor;
         }
-    } */
+    }*/
 
     private boolean testEdgeTo(int ancestor, int destination) {
         // System.out.printf("inside testEdge for " + from + " and " + to);
