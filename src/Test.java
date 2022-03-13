@@ -1,3 +1,8 @@
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.Topological;
+
 public class Test {
     private int count;
     private int[] id = new int[count];
@@ -47,5 +52,11 @@ public class Test {
         for (; i < second.length(); ++i) {
             System.out.println("i: " + i);
         }
+        // Topological topological = new Topological(new Digraph(new In("digraph3.txt")));
+        Topological topological = new Topological(new Digraph(new In("tinyDG.txt")));
+        for(int v: topological.order()){
+            StdOut.print(v);
+        }
+        System.out.println();
     }
 }
