@@ -23,6 +23,7 @@ public class SAP {
     private int hops = 0;
     private static final int INFINITY = Integer.MAX_VALUE;
     private final boolean print = false;
+    ST<Integer, Integer> st;
 
     // constructor takes a digraph ( not necessarily a DAG )
     public SAP(Digraph digraph) {
@@ -43,7 +44,7 @@ public class SAP {
         reversePost = new Stack<>();
         //postOrder = new Queue<>();
         for (int i = 0; i < n; i++) {
-            dfs(digraphDFCopy, i);
+            if (!marked[i]) dfs(digraphDFCopy, i);
         }
         System.out.println("Hi");
     }
@@ -87,11 +88,13 @@ public class SAP {
     }
 
     private Iterable<Integer> reversePostOrder() {
-        Queue<Integer> temp = new Queue<>();
-        while (!reversePost.isEmpty()) {
-            temp.enqueue(reversePost.pop());
+        st = new ST<>();
+        int counter = n;
+        while (!reversePost.isEmpty() && counter >= 0) {
+            st.put(reversePost.pop(), n);
+            counter--;
         }
-        return temp;
+        return st.keys();
     }
 
     private Iterable<Integer> postOrder() {
@@ -125,7 +128,7 @@ public class SAP {
             ancestor = -1;
             return minDistance = -1;
         }
-        lockStepBFS(from, to);
+        lockStepBFS();
         return minDistance;
     }
 
@@ -194,7 +197,7 @@ public class SAP {
             minDistance = -1;
             return ancestor = -1;
         }
-        lockStepBFS(v, w);
+        lockStepBFS();
         return ancestor;
     }
 
@@ -262,17 +265,26 @@ public class SAP {
         topological order. I can only assume that it means it is closer to the sink, but will have to validate this. Also
         use a method like find() to traverse edgeTo and connected to check the ids. Find out why reversePost for digraph3
          is missing some nodes and see what can be done about digraphs with two cycles */
-    private void lockStepBFS(int f, int t) {
+    private void lockStepBFS() {
         marked = new boolean[n];
         Queue<Integer> fromQueue = new Queue<>();
         Queue<Integer> toQueue = new Queue<>();
-        marked[f] = true;
-        marked[t] = true;
-        fromQueue.enqueue(f);
-        toQueue.enqueue(t);
-        DistTo[f] = 0;
-        DistTo[t] = 0;
+        marked[from] = true;
+        marked[to] = true;
+        // fromQueue.enqueue(from);
+        // toQueue.enqueue(to);
+        DistTo[from] = 0;
+        DistTo[to] = 0;
         int nodeDistance = 0;
+        fromQueue.enqueue(2);
+        fromQueue.enqueue(3);
+        toQueue.enqueue(0);
+        toQueue.enqueue(5);
+        int v = 0;
+        while (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
+            v = st.get(fromQueue.peek()) < st.get(toQueue.peek()) ? fromQueue.dequeue() : toQueue.dequeue();
+            System.out.print("should print 05"+v);
+        }
 
     }
     /*private void lockStepBFS(int f, int t) {
@@ -362,23 +374,13 @@ public class SAP {
     public static void main(String[] args) {
         Digraph digraph = new Digraph(new In("tinyDG.txt"));
         SAP sap = new SAP(digraph);
-        // System.out.println(sap.ancestor(1, 2));
-        /* The following code will print the preorder, postorder,
-        and reverse postorder of any digraph's nodes*/
-        System.out.println("Here is nodes in preorder: ");
-        for (int i : sap.preOrder()) {
-            System.out.print(" " + i);
-        }
-        System.out.println();
-        System.out.println(" Here are the nodes in post order: ");
-        for (int j : sap.postOrder) {
-            System.out.println(" " + j);
-        }
-        System.out.printf("");
+        sap.reversePostOrder();
+        sap.lockStepBFS();
         System.out.println("Here are the nodes in reverse post order: ");
         for (int k : sap.reversePost) {
             System.out.println(" " + k);
         }
+
         System.out.println("Here are the nodes in the cycle: ");
         if (sap.hasCycle())
             for (int m : sap.cycle()) {
