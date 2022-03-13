@@ -34,12 +34,16 @@ public class SAP {
         n = digraphDFCopy.V();
         onStack = new boolean[n];
         // DistTo = new int[n];
-        // edgeTo = new int[n];
-        // id = new int[n];
+        edgeTo = new int[n];
+        id = new int[n];
         marked = new boolean[n];
         //pre = new Queue<>();
         reversePost = new Stack<>();
         //postOrder = new Queue<>();
+        for (int i = 0; i < n; i++) {
+            id[i] = i;
+            edgeTo[i] = i;
+        }
         for (int i = 0; i < n; i++) {
             if (!marked[i]) dfs(digraphDFCopy, i);
         }
@@ -52,6 +56,8 @@ public class SAP {
         for (int w : digraphDFCopy.adj(v)) {
             if (this.hasCycle()) return;
             else if (!marked[w]) {
+                id[w] = id[v];
+                edgeTo[w] = v;
                 dfs(digraphDFCopy, w);
             } else if (onStack[w]) {
                 cycle = new Stack<>();
@@ -264,8 +270,8 @@ public class SAP {
          */
     private void lockStepBFS() {
         marked = new boolean[n];
-        edgeTo = new int[n];
-        id = new int[n];
+        // edgeTo = new int[n];
+        // id = new int[n];
         DistTo = new int[n];
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
@@ -286,8 +292,8 @@ public class SAP {
                     if (!marked[i]) {
                         fromQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        // edgeTo[i] = v;
+                        // id[i] = id[v];
                     }
                 }
             } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] == nodeDistance) {
@@ -295,8 +301,8 @@ public class SAP {
                 for (int i : digraphDFCopy.adj(v)) {
                     toQueue.enqueue(i);
                     DistTo[i] = DistTo[v] + 1;
-                    edgeTo[i] = v;
-                    id[i] = id[v];
+                    // edgeTo[i] = v;
+                    // id[i] = id[v];
                 }
             } else {
                 // take from the one that is smaller topologically
@@ -307,8 +313,8 @@ public class SAP {
                         if (!marked[i]) {
                             fromQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            // edgeTo[i] = v;
+                            // id[i] = id[v];
                         }
                     }
                     nodeDistance = v;
@@ -317,8 +323,8 @@ public class SAP {
                     for (int i : digraphDFCopy.adj(v)) {
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        // edgeTo[i] = v;
+                        // id[i] = id[v];
                     }
                     nodeDistance = v;
                 } else {
@@ -327,8 +333,8 @@ public class SAP {
                     for (int i : digraphDFCopy.adj(v)) {
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        // edgeTo[i] = v;
+                        // id[i] = id[v];
                     }
                     nodeDistance = v;
                 }
