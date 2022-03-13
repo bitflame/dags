@@ -15,7 +15,8 @@ public class SAP {
     Stack<Integer> reversePost;
     Queue<Integer> pre;
     Queue<Integer> postOrder;
-    Queue<Integer> bfsQueue = new Queue<>();
+    Queue<Integer> fromQueue;
+    Queue<Integer> toQueue;
     private int[] edgeTo;
     private int[] DistTo;
     private int[] id;
@@ -32,31 +33,23 @@ public class SAP {
         digraphDFCopy = new Digraph(digraph);
         n = digraphDFCopy.V();
         onStack = new boolean[n];
-        DistTo = new int[n];
-        edgeTo = new int[n];
-        id = new int[n];
+        // DistTo = new int[n];
+        // edgeTo = new int[n];
+        // id = new int[n];
         marked = new boolean[n];
-        for (int i = 0; i < n; i++) {
-            edgeTo[i] = i;
-            id[i] = i;
-        }
         //pre = new Queue<>();
         reversePost = new Stack<>();
         //postOrder = new Queue<>();
         for (int i = 0; i < n; i++) {
             if (!marked[i]) dfs(digraphDFCopy, i);
         }
-        System.out.println("Hi");
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
         marked[v] = true;
         onStack[v] = true;
-        //pre.enqueue(v);
+        // pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
-            edgeTo[w] = v;
-            id[w] = id[v];
-            DistTo[w] = DistTo[v] + 1;
             if (this.hasCycle()) return;
             else if (!marked[w]) {
                 dfs(digraphDFCopy, w);
@@ -71,7 +64,7 @@ public class SAP {
         }
         onStack[v] = false;
         reversePost.push(v);
-        //postOrder.enqueue(v);
+        // postOrder.enqueue(v);
     }
 
 
@@ -242,21 +235,20 @@ public class SAP {
         return ancestor;
     }
 
-    private int find(int x) {
+    /* y is x's current parent. The one that is supposed to be updated edgeTo but is not so we don't lose track of the
+     * previous edgeTo */
+    private boolean checkEdgeTo(int x, int y) {
         hops = 0;
-        while (x != edgeTo[x]) {
-            x = edgeTo[x];
+        // x should have a path to one end and its parent to the other end
+        for (; x != from && x != to; x = edgeTo[x]) {
             hops++;
         }
-        return x;
-    }
-
-    private void updateDistance(int newNode, int previousNode) {
-        while (DistTo[newNode] + 1 < DistTo[previousNode]) {
-            DistTo[previousNode] = DistTo[newNode] + 1;
-            newNode = previousNode;
-            previousNode = edgeTo[previousNode];
+        hops++;
+        // now check x's parent to make sure it can get  to the other end
+        for (; y != from && y != to; y = edgeTo[y]) {
+            hops++;
         }
+        return ((x == from && y == to) || (x == to && y == from));
     }
 
     /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
@@ -264,26 +256,84 @@ public class SAP {
          is further before it moves on. And use the reversePost to give priority to the vertex that is "smaller" in
         topological order. I can only assume that it means it is closer to the sink, but will have to validate this. Also
         use a method like find() to traverse edgeTo and connected to check the ids. Find out why reversePost for digraph3
-         is missing some nodes and see what can be done about digraphs with two cycles */
+         is missing some nodes and see what can be done about digraphs with two cycles
+         how should I deal with graphs with multiple circuits
+         check the reverse order of other graphs and make sure all the nodes are there
+         in postorder children return first
+         if the ids are the same or find can traverse to both ends from the current node, that node is the ancestor
+         */
     private void lockStepBFS() {
         marked = new boolean[n];
-        Queue<Integer> fromQueue = new Queue<>();
-        Queue<Integer> toQueue = new Queue<>();
+        edgeTo = new int[n];
+        id = new int[n];
+        DistTo = new int[n];
+        fromQueue = new Queue<>();
+        toQueue = new Queue<>();
         marked[from] = true;
         marked[to] = true;
-        // fromQueue.enqueue(from);
-        // toQueue.enqueue(to);
+        fromQueue.enqueue(from);
+        toQueue.enqueue(to);
         DistTo[from] = 0;
         DistTo[to] = 0;
         int nodeDistance = 0;
-        fromQueue.enqueue(2);
-        fromQueue.enqueue(3);
-        toQueue.enqueue(0);
-        toQueue.enqueue(5);
         int v = 0;
         while (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
-            v = st.get(fromQueue.peek()) < st.get(toQueue.peek()) ? fromQueue.dequeue() : toQueue.dequeue();
-            System.out.print("should print 05"+v);
+
+            // take from the one with less distance
+            if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] == nodeDistance) {
+                v = fromQueue.dequeue();
+                for (int i : digraphDFCopy.adj(v)) {
+                    if (!marked[i]) {
+                        fromQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                }
+            } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] == nodeDistance) {
+                v = toQueue.dequeue();
+                for (int i : digraphDFCopy.adj(v)) {
+                    toQueue.enqueue(i);
+                    DistTo[i] = DistTo[v] + 1;
+                    edgeTo[i] = v;
+                    id[i] = id[v];
+                }
+            } else {
+                // take from the one that is smaller topologically
+                v = st.get(fromQueue.peek()) < st.get(toQueue.peek()) ? fromQueue.dequeue() : toQueue.dequeue();
+                if (st.get(fromQueue.peek()) < st.get(toQueue.peek())) {
+                    v = fromQueue.dequeue();
+                    for (int i : digraphDFCopy.adj(v)) {
+                        if (!marked[i]) {
+                            fromQueue.enqueue(i);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
+                    }
+                    nodeDistance = v;
+                } else if (st.get(toQueue.peek()) < st.get(fromQueue.peek())) {
+                    v = toQueue.dequeue();
+                    for (int i : digraphDFCopy.adj(v)) {
+                        toQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                    nodeDistance = v;
+                } else {
+                    // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
+                    v = toQueue.dequeue();
+                    for (int i : digraphDFCopy.adj(v)) {
+                        toQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                    nodeDistance = v;
+                }
+            }
+            nodeDistance++;
         }
 
     }
@@ -372,15 +422,8 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-        Digraph digraph = new Digraph(new In("tinyDG.txt"));
+        Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        sap.reversePostOrder();
-        sap.lockStepBFS();
-        System.out.println("Here are the nodes in reverse post order: ");
-        for (int k : sap.reversePost) {
-            System.out.println(" " + k);
-        }
-
         System.out.println("Here are the nodes in the cycle: ");
         if (sap.hasCycle())
             for (int m : sap.cycle()) {
