@@ -257,8 +257,24 @@ public class SAP {
     }
 
     /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
-        nodes with distance 2 and on and on. And use the reversePost to give priority to the vertex that is "smaller" in
-        topological order. I can only assume that it means it is close to the sink, but will have to validate this. */
+        nodes with distance 2 and on and on. Use a distance counter, and a conditional that checks to see if the next node
+         is further before it moves on. And use the reversePost to give priority to the vertex that is "smaller" in
+        topological order. I can only assume that it means it is closer to the sink, but will have to validate this. Also
+        use a method like find() to traverse edgeTo and connected to check the ids. Find out why reversePost for digraph3
+         is missing some nodes and see what can be done about digraphs with two cycles */
+    private void lockStepBFS(int f, int t) {
+        marked = new boolean[n];
+        Queue<Integer> fromQueue = new Queue<>();
+        Queue<Integer> toQueue = new Queue<>();
+        marked[f] = true;
+        marked[t] = true;
+        fromQueue.enqueue(f);
+        toQueue.enqueue(t);
+        DistTo[f] = 0;
+        DistTo[t] = 0;
+        int nodeDistance = 0;
+
+    }
     /*private void lockStepBFS(int f, int t) {
         marked = new boolean[n];
         Queue<Integer> fromQueue = new Queue<>();
