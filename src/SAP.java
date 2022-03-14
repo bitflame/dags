@@ -295,7 +295,7 @@ public class SAP {
         while (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
 
             // take from the one with less distance
-            if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] == nodeDistance) {
+            if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
                 v = fromQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) {
                     if (!marked[i]) {
@@ -313,7 +313,7 @@ public class SAP {
                         minDistance = DistTo[i] + DistTo[v] + 1;
                     }
                 }
-            } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] == nodeDistance) {
+            } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
                 v = toQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) {
                     if (!marked[i]) {
@@ -331,7 +331,7 @@ public class SAP {
                         minDistance = DistTo[i] + DistTo[v] + 1;
                     }
                 }
-            } else {
+            } else if (!hasCycle()) {
                 if (st.get(fromQueue.peek()) < st.get(toQueue.peek())) {
                     v = fromQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) {
@@ -370,26 +370,28 @@ public class SAP {
                         }
                     }
                     nodeDistance = v;
-                } else {
-                    // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
-                    v = toQueue.dequeue();
-                    for (int i : digraphDFCopy.adj(v)) {
-                        if (!marked[i]) {
-                            toQueue.enqueue(i);
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        } else if (id[i] != i) {
-                            // you hit a back edge - it should not lead to a valid ancestor
-                            ancestor = -1;
-                            minDistance = -1;
-                        } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
-                            // you found an ancestor
-                            ancestor = i;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
-                        }
+                }
+            } else {
+                // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
+                v = toQueue.dequeue();
+                for (int i : digraphDFCopy.adj(v)) {
+                    if (!marked[i]) {
+                        toQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    } else if (id[i] != i) {
+                        // you hit a back edge - it should not lead to a valid ancestor
+                        ancestor = -1;
+                        minDistance = -1;
+                    } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                        // you found an ancestor
+                        ancestor = i;
+                        minDistance = DistTo[i] + DistTo[v] + 1;
+                    } else if (i == from && testEdgeTo(i, to)) {
+                        ancestor = i;
+                        minDistance = DistTo[i] + DistTo[v] + 1;
                     }
-                    nodeDistance = v;
                 }
             }
             nodeDistance++;

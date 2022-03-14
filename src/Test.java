@@ -45,17 +45,13 @@ public class Test {
 
     // 1.5.23 Doubling test
     public static void main(String[] args) {
-        String first = "bb";
-        String second = "bb";
-        System.err.println(first.compareTo(second));
-        int i = 0;
-        for (; i < second.length(); ++i) {
-            System.out.println("i: " + i);
-        }
-        // Topological topological = new Topological(new Digraph(new In("digraph3.txt")));
-        Topological topological = new Topological(new Digraph(new In("tinyDG.txt")));
-        for(int v: topological.order()){
-            StdOut.print(v);
+        /* How come I get answer for tinyDG.txt but not for digraph3.txt I think if the cycle is connected to the rest
+        * of the graph, it can be ordered topologically but if it has two separate components, then it can not. I think
+        * the expected answer for digraph3 is only if the nodes are in the same component, if not, you return -1*/
+         Topological topological = new Topological(new Digraph(new In("digraph3.txt")));
+        // Topological topological = new Topological(new Digraph(new In("tinyDG.txt")));
+        for (int v : topological.order()) {
+            StdOut.print(" " + v);
         }
         System.out.println();
     }
