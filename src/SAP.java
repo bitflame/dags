@@ -11,6 +11,8 @@ public class SAP {
     private final int n;
     private boolean[] marked;
     private boolean[] onStack;
+    private boolean[] onFromStack;
+    private boolean[] onToStack;
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
     Queue<Integer> pre;
@@ -55,7 +57,7 @@ public class SAP {
         // pre.enqueue(v);
         for (int w : digraphDFCopy.adj(v)) {
             if (this.hasCycle()) return;
-            else if (!marked[w]) {
+            if (!marked[w]) {
                 id[w] = id[v];
                 edgeTo[w] = v;
                 dfs(digraphDFCopy, w);
@@ -284,6 +286,7 @@ public class SAP {
         DistTo = new int[n];
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
+        onFromStack = new boolean[n];
         marked[from] = true;
         marked[to] = true;
         fromQueue.enqueue(from);
@@ -292,62 +295,85 @@ public class SAP {
         DistTo[to] = 0;
         int nodeDistance = 0;
         int v = 0;
+        int currentDistance = INFINITY;
+        int tempDistance = 0;
         while (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
-
             // take from the one with less distance
             if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
                 v = fromQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) {
                     if (!marked[i]) {
+                        marked[i] = true;
+                        onFromStack[i] = true;
                         fromQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
-                    } else if (id[i] != i) {
-                        // you hit a back edge
-                        ancestor = -1;
-                        minDistance = -1;
-                    } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                    } else if (onFromStack[i]) {
+                        cycle = new Stack<>();
+                        for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
+                        cycle.push(i);
+                        cycle.push(v);
+                    } else if (checkEdgeTo(i, from) && testEdgeTo(i, to)) {
                         // you found an ancestor
-                        ancestor = i;
-                        minDistance = DistTo[i] + DistTo[v] + 1;
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance < currentDistance) {
+                            ancestor = i;
+                            minDistance = tempDistance;
+                        }
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
                     }
                 }
             } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
                 v = toQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) {
                     if (!marked[i]) {
+                        marked[i] = true;
+                        onToStack[i]=true;
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
-                    } else if (id[i] != i) {
-                        // you hit a back edge
-                        ancestor = -1;
-                        minDistance = -1;
-                    } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                    } else if (onToStack[i]) {
+                        cycle=new Stack<>();
+                        for(int x=v; i!=i; x=edgeTo[x]) cycle.push(x);
+                        cycle.push(i);
+                        cycle.push(v);
+                    } else if (checkEdgeTo(i, from) && checkEdgeTo(i, to)) {
                         // you found an ancestor
-                        ancestor = i;
-                        minDistance = DistTo[i] + DistTo[v] + 1;
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance < currentDistance) {
+                            ancestor = i;
+                            minDistance = tempDistance;
+                        }
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
                     }
+
                 }
             } else if (!hasCycle()) {
                 if (st.get(fromQueue.peek()) < st.get(toQueue.peek())) {
                     v = fromQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) {
                         if (!marked[i]) {
+                            marked[i] = true;
                             fromQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
                             id[i] = id[v];
-                        } else if (id[i] != i) {
-                            // you hit a back edge
-                            ancestor = -1;
-                            minDistance = -1;
-                        } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                        } else if (checkEdgeTo(i, from) && checkEdgeTo(i, to)) {
                             // you found an ancestor
-                            ancestor = i;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance < currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                            }
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
                         }
                     }
                     nodeDistance = v;
@@ -355,18 +381,21 @@ public class SAP {
                     v = toQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) {
                         if (!marked[i]) {
+                            marked[i] = true;
                             toQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
                             id[i] = id[v];
-                        } else if (id[i] != i) {
-                            // you hit a back edge
-                            ancestor = -1;
-                            minDistance = -1;
-                        } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                        } else if (checkEdgeTo(i, from) && checkEdgeTo(i, to)) {
                             // you found an ancestor
-                            ancestor = i;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance < currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                            }
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
                         }
                     }
                     nodeDistance = v;
@@ -376,21 +405,24 @@ public class SAP {
                 v = toQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) {
                     if (!marked[i]) {
+                        marked[i] = true;
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
-                    } else if (id[i] != i) {
-                        // you hit a back edge - it should not lead to a valid ancestor
-                        ancestor = -1;
-                        minDistance = -1;
-                    } else if (testEdgeTo(i, from) && testEdgeTo(i, to)) {
+                    } else if (checkEdgeTo(i, from) && checkEdgeTo(i, to)) {
                         // you found an ancestor
                         ancestor = i;
                         minDistance = DistTo[i] + DistTo[v] + 1;
                     } else if (i == from && testEdgeTo(i, to)) {
-                        ancestor = i;
-                        minDistance = DistTo[i] + DistTo[v] + 1;
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance < currentDistance) {
+                            ancestor = i;
+                            minDistance = tempDistance;
+                        }
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
                     }
                 }
             }
@@ -484,6 +516,25 @@ public class SAP {
     public static void main(String[] args) {
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        sap.length(13, 14);
+        System.out.printf("Test 1 - expecting 1, getting: %d\n", sap.length(13, 14));
+        System.out.printf("Test 2 - expecting 1, getting: %d\n", sap.length(14, 13));
+        System.out.printf("Test 3 - expecting 2, getting: %d\n", sap.length(13, 0));
+        System.out.printf("Test 4 - expecting 2, getting: %d\n", sap.length(0, 13));
+        System.out.printf("Test 5 - expecting 1, getting: %d\n", sap.length(14, 0));
+        System.out.printf("Test 6 - expecting 1, getting: %d\n", sap.length(0, 14));
+        System.out.printf("Test 7 - expecting 3, getting: %d\n", sap.length(13, 11));
+        System.out.printf("Test 8 - expecting 3, getting: %d\n", sap.length(11, 13));
+        System.out.printf("Test 9 - expecting 2, getting: %d\n", sap.length(14, 11));
+        System.out.printf("Test10 - expecting 2, getting: %d\n", sap.length(11, 14));
+        System.out.printf("Test11 - expecting 3, getting: %d\n", sap.length(14, 12));
+        System.out.printf("Test12 - expecting 3, getting: %d\n", sap.length(12, 14));
+        System.out.printf("Test13 - expecting 3, getting: %d\n", sap.length(14, 10));
+        System.out.printf("Test14 - expecting 3, getting: %d\n", sap.length(10, 14));
+        System.out.printf("Test15 - expecting 4, getting: %d\n", sap.length(14, 9));
+        System.out.printf("Test16 - expecting 4, getting: %d\n", sap.length(9, 14));
+        System.out.printf("Test17 - expecting 5, getting: %d\n", sap.length(13, 8));
+        System.out.printf("Test18 - expecting 5, getting: %d\n", sap.length(8, 13));
+        System.out.printf("Test19 - expecting 4, getting: %d\n", sap.length(14, 8));
+        System.out.printf("Test20 - expecting 4, getting: %d\n", sap.length(8, 14));
     }
 }
