@@ -49,6 +49,7 @@ public class SAP {
         for (int i = 0; i < n; i++) {
             if (!marked[i]) dfs(digraphDFCopy, i);
         }
+        reversePostOrder();
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
@@ -326,7 +327,7 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                            DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                            DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                             edgeTo[i] = v;
                             id[i] = id[v];
                         }
@@ -357,7 +358,7 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                            DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                            DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                             edgeTo[i] = v;
                             id[i] = id[v];
                         }
@@ -384,7 +385,7 @@ public class SAP {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                                DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             }
@@ -410,7 +411,7 @@ public class SAP {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                                DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             }
@@ -440,7 +441,7 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                        DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                         edgeTo[i] = v;
                         id[i] = id[v];
                     } else if (id[i] == from) {
@@ -453,7 +454,7 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        DistTo[i]=Math.min(DistTo[i],DistTo[v]+1);
+                        DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                         edgeTo[i] = v;
                         id[i] = id[v];
                     }
@@ -499,6 +500,10 @@ public class SAP {
                 }
             }
             nodeDistance++;
+        }
+        if (currentDistance == INFINITY) {
+            minDistance = -1;
+            ancestor = -1;
         }
     }
     /*private void lockStepBFS(int f, int t) {
@@ -586,27 +591,125 @@ public class SAP {
     }
 
     public static void main(String[] args) {
+        /*
+        System.out.printf("****************************************Testing digraph3 \n");
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        System.out.printf("Test 1 - expecting 1, getting: %d\n", sap.length(13, 14));
-        System.out.printf("Test 2 - expecting 1, getting: %d\n", sap.length(14, 13));
-        System.out.printf("Test 3 - expecting 2, getting: %d\n", sap.length(13, 0));
-        System.out.printf("Test 4 - expecting 2, getting: %d\n", sap.length(0, 13));
-        System.out.printf("Test 5 - expecting 1, getting: %d\n", sap.length(14, 0));
-        System.out.printf("Test 6 - expecting 1, getting: %d\n", sap.length(0, 14));
-        System.out.printf("Test 7 - expecting 3, getting: %d\n", sap.length(13, 11));
-        System.out.printf("Test 8 - expecting 3, getting: %d\n", sap.length(11, 13));
-        System.out.printf("Test 9 - expecting 2, getting: %d\n", sap.length(14, 11));
-        System.out.printf("Test10 - expecting 2, getting: %d\n", sap.length(11, 14));
+        System.out.printf("Test 1 - (13, 14) expecting 1, getting: %d\n", sap.length(13, 14));
+        System.out.printf("Expected ancestor: 14. Actual ancestor: %d\n", sap.ancestor(13, 14));
+        System.out.printf("Test 2 - (14, 13) expecting 1, getting: %d\n", sap.length(14, 13));
+        System.out.printf("Expected ancestor: 14. Actual ancestor: %d\n", sap.ancestor(14, 13));
+        System.out.printf("Test 3 - (13, 0) expecting 2, getting: %d\n", sap.length(13, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(13, 0));
+        System.out.printf("Test 4 - (0, 13) expecting 2, getting: %d\n", sap.length(0, 13));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 13));
+        System.out.printf("Test 5 - (14, 0) expecting 1, getting: %d\n", sap.length(14, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(14, 0));
+        System.out.printf("Test 6 - (0, 14) expecting 1, getting: %d\n", sap.length(0, 14));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 14));
+        System.out.printf("Test 7 - (13, 11) expecting 3, getting: %d\n", sap.length(13, 11));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(13, 11));
+        System.out.printf("Test 8 - (11, 13) expecting 3, getting: %d\n", sap.length(11, 13));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(11, 13));
+        System.out.printf("Test 9 - (14, 11) expecting 2, getting: %d\n", sap.length(14, 11));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(14, 11));
+        System.out.printf("Test10 - (11, 14) expecting 2, getting: %d\n", sap.length(11, 14));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(11, 14));
         System.out.printf("Test11 - (14, 12) expecting 3, getting: %d\n", sap.length(14, 12));
+        System.out.printf("Expected ancestor: 12. Actual ancestor: %d\n", sap.ancestor(14, 12));
         System.out.printf("Test12 - (12, 14) expecting 3, getting: %d\n", sap.length(12, 14));
+        System.out.printf("Expected ancestor: 12. Actual ancestor: %d\n", sap.ancestor(12, 14));
         System.out.printf("Test13 - (14, 10) expecting 3, getting: %d\n", sap.length(14, 10));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(14, 10));
         System.out.printf("Test14 - (10, 14) expecting 3, getting: %d\n", sap.length(10, 14));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(10, 14));
         System.out.printf("Test15 - (14, 9) expecting 4, getting: %d\n", sap.length(14, 9));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(14, 9));
         System.out.printf("Test16 - (9, 14) expecting 4, getting: %d\n", sap.length(9, 14));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(9, 14));
         System.out.printf("Test17 - (13, 8) expecting 5, getting: %d\n", sap.length(13, 8));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(13, 8));
         System.out.printf("Test18 - (8, 13) expecting 5, getting: %d\n", sap.length(8, 13));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(8, 13));
         System.out.printf("Test19 - (14, 8) expecting 4, getting: %d\n", sap.length(14, 8));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(14, 8));
         System.out.printf("Test20 - (8, 14) expecting 4, getting: %d\n", sap.length(8, 14));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(8, 14));
+        System.out.printf("Test21 - (7, 13) expecting 6, getting: %d\n", sap.length(7, 13));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(7, 13));
+        System.out.printf("Test22 - (13, 7) expecting 6, getting: %d\n", sap.length(13, 7));
+        System.out.printf("Expected ancestor: 8. Actual ancestor: %d\n", sap.ancestor(13, 7));
+        System.out.printf("Test23 - (1, 2) expecting 1, getting: %d\n", sap.length(1, 2));
+        System.out.printf("Expected ancestor: 2. Actual ancestor: %d\n", sap.ancestor(1, 2));
+        System.out.printf("Test24 - (1, 13) expecting -1, getting: %d\n", sap.length(1, 13));
+        System.out.printf("Expected ancestor: -1. Actual ancestor: %d\n", sap.ancestor(1, 13));
+        System.out.printf("****************************************Testing digraph1 \n");
+        Digraph digraph = new Digraph(new In("digraph1.txt"));
+        SAP sap = new SAP(digraph);
+        System.out.printf("Test 1 - (0, 2) expecting 1, getting: %d\n", sap.length(0, 2));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 2));
+        System.out.printf("Test 2 - (2, 0) expecting 1, getting: %d\n", sap.length(2, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(2, 0));
+        System.out.printf("Test 3 - (0, 1) expecting 1, getting: %d\n", sap.length(0, 1));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 1));
+        System.out.printf("Test 4 - (1, 0) expecting 1, getting: %d\n", sap.length(1, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(1, 0));
+        System.out.printf("Test 5 - (1, 2) expecting 2, getting: %d\n", sap.length(1, 2));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(1, 2));
+        System.out.printf("Test 6 - (2, 1) expecting 2, getting: %d\n", sap.length(2, 1));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(2, 1));
+        System.out.printf("Test 7 - (4, 0) expecting 2, getting: %d\n", sap.length(4, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(4, 0));
+        System.out.printf("Test 8 - (0, 4) expecting 2, getting: %d\n", sap.length(0, 4));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 4));
+        System.out.printf("Test 9 - (4, 2) expecting 3, getting: %d\n", sap.length(4, 2));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(4, 2));
+        System.out.printf("Test 10 - (2, 4) expecting 3, getting: %d\n", sap.length(2, 4));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(2, 4));
+        System.out.printf("Test 11 - (3, 5) expecting 2, getting: %d\n", sap.length(3, 5));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(3, 5));
+        System.out.printf("Test 12 - (5, 3) expecting 2, getting: %d\n", sap.length(5, 3));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(5, 3));
+        System.out.printf("Test 13 - (7, 11) expecting 5, getting: %d\n", sap.length(7, 11));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(7, 11));
+        System.out.printf("Test 14 - (11, 7) expecting 5, getting: %d\n", sap.length(11, 7));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(11, 7));
+        System.out.printf("Test 15 - (12, 4) expecting 4, getting: %d\n", sap.length(12, 4));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(12, 4));
+        System.out.printf("Test 16 - (12, 4) expecting 4, getting: %d\n", sap.length(12, 4));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(12, 4));
+        System.out.printf("Test 17 - (9, 1) expecting 2, getting: %d\n", sap.length(9, 1));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(9, 1));
+        System.out.printf("Test 18 - (1, 9) expecting 2, getting: %d\n", sap.length(1, 9));
+        System.out.printf("Expected ancestor: 1. Actual ancestor: %d\n", sap.ancestor(1, 9));
+        System.out.printf("Test 19 - (12, 0) expecting 4, getting: %d\n", sap.length(12, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(12, 0));
+        System.out.printf("Test 20 - (0, 12) expecting 4, getting: %d\n", sap.length(0, 12));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 12)); */
+        System.out.printf("****************************************Testing digraph2 \n");
+        Digraph digraph = new Digraph(new In("digraph2.txt"));
+        SAP sap = new SAP(digraph);
+        System.out.printf("Test 1 - (1, 02) expecting 1, getting: %d\n", sap.length(1, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(1, 0));
+        System.out.printf("Test 2 - (0, 1) expecting 1, getting: %d\n", sap.length(0, 1));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 1));
+        System.out.printf("Test 3 - (5, 0) expecting 1, getting: %d\n", sap.length(5, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(5, 0));
+        System.out.printf("Test 4 - (0, 5) expecting 1, getting: %d\n", sap.length(0, 5));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 5));
+        System.out.printf("Test 5 - (5, 1) expecting 2, getting: %d\n", sap.length(5, 1));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(5, 1));
+        System.out.printf("Test 6 - (1, 5) expecting 2, getting: %d\n", sap.length(1, 5));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(1, 5));
+        System.out.printf("Test 7 - (4, 0) expecting 2, getting: %d\n", sap.length(4, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(4, 0));
+        System.out.printf("Test 8 - (0, 4) expecting 2, getting: %d\n", sap.length(0, 4));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 4));
+        System.out.printf("Test 9 - (4, 1) expecting 3, getting: %d\n", sap.length(4, 1));
+        System.out.printf("Expected ancestor: 4. Actual ancestor: %d\n", sap.ancestor(4, 1));
+        System.out.printf("Test 10 - (2, 0) expecting 4, getting: %d\n", sap.length(2, 0));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(2, 0));
+        System.out.printf("Test 11 - (0, 2) expecting 4, getting: %d\n", sap.length(0, 2));
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 2));
     }
 }
