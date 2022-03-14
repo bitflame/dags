@@ -288,6 +288,7 @@ public class SAP {
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
         onFromStack = new boolean[n];
+        onToStack = new boolean[n];
         marked[from] = true;
         marked[to] = true;
         fromQueue.enqueue(from);
