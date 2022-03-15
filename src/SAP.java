@@ -249,15 +249,15 @@ public class SAP {
     private boolean checkEdgeTo(int x, int y) {
         hops = 0;
         // x should have a path to one end and its parent to the other end
-        for (; x != from && x != to; x = edgeTo[x]) {
+        for (; x != from && x != to && !hasCycle(); x = edgeTo[x]) {
             hops++;
         }
         hops++;
         // now check x's parent to make sure it can get  to the other end
-        for (; y != from && y != to; y = edgeTo[y]) {
+        for (; y != from && y != to && !hasCycle(); y = edgeTo[y]) {
             hops++;
         }
-        return ((x == from && y == to) || (x == to && y == from));
+        return ((x == from && y == to) || (x == to && y == from) || (hasCycle() && x == to && y == to) || (hasCycle() && x == from && y == from));
     }
 
     /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
@@ -329,7 +329,8 @@ public class SAP {
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
                             // DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
-                            DistTo[i] = DistTo[v] + 1;
+                            // DistTo[i] = DistTo[v] + 1;
+                            DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                             edgeTo[i] = v;
                             id[i] = id[v];
                         } else if (id[i] == to) {
@@ -373,6 +374,7 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
+                            // DistTo[i] = DistTo[v] + 1;
                             DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                             edgeTo[i] = v;
                             id[i] = id[v];
@@ -413,7 +415,8 @@ public class SAP {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                DistTo[i] = DistTo[v] + 1;
+                                // DistTo[i] = DistTo[v] + 1;
+                                DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             } else if (id[i] == to) {
@@ -452,7 +455,8 @@ public class SAP {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                DistTo[i] = DistTo[v] + 1;
+                                // DistTo[i] = DistTo[v] + 1;
+                                DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             } else if (id[i] == from) {
@@ -501,6 +505,7 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
+                        // DistTo[i] = DistTo[v] + 1;
                         DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                         edgeTo[i] = v;
                         id[i] = id[v];
@@ -546,6 +551,7 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
+                        // DistTo[i] = DistTo[v] + 1;
                         DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                         edgeTo[i] = v;
                         id[i] = id[v];
