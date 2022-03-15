@@ -182,8 +182,8 @@ public class AutoGraderTests {
         if (shortestDistance != 3)
             System.out.printf("Distance between 4, and 1 should be 3, but it is: %d\n", shortestDistance);
         ancestor = sap.ancestor(4, 1);
-        if (ancestor != 4)
-            System.out.printf("The value of ancestor between 4 and 1 should be 4, but it is: %d\n", ancestor);
+        if (ancestor != 0)
+            System.out.printf("The value of ancestor between 4 and 1 should be 0, but it is: %d\n", ancestor);
         shortestDistance = sap.length(4, 0);
         if (shortestDistance != 2)
             System.out.printf("Distance between 4, and 0 should be 2, but it is: %d\n", shortestDistance);
@@ -226,8 +226,8 @@ public class AutoGraderTests {
         if (shortestDistance != 3)
             System.out.printf("Distance between 5 and 2 should be 3, but it is: %d\n", shortestDistance);
         ancestor = sap.ancestor(5, 2);
-        if (ancestor != 2)
-            System.out.printf("The value of ancestor between 5 and 2 should be 2, but it is: %d\n", ancestor);
+        if (ancestor != 5)
+            System.out.printf("The value of ancestor between 5 and 2 should be 5, but it is: %d\n", ancestor);
 
         shortestDistance = sap.length(5, 3);
         if (shortestDistance != 2)
@@ -462,7 +462,9 @@ public class AutoGraderTests {
         sap = new SAP(digraph);
         shortestDistance = sap.length(0, 5);
         if (shortestDistance != 5)
-            System.out.printf("The distance between 0 and 5 should be 5, but it is: %d\n", shortestDistance);
+            System.out.printf("The distance between 0 and 5 should be 6, but it is: %d\n", shortestDistance);
+        ancestor = sap.ancestor(0, 5);
+        if (ancestor != 4) System.out.printf("The ancestor for 0 and 5 should be 4, but it is: %d\n", ancestor);
         shortestDistance = sap.length(7, 3);
         if (shortestDistance != 1)
             System.out.printf("The distance between 7 and 3 should be 1, but it is: %d\n", shortestDistance);
@@ -618,15 +620,15 @@ public class AutoGraderTests {
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
         // autoGraderTests.troubleShooting();
-        autoGraderTests.testDigraphWordNet();
-        autoGraderTests.testDigraph1();
-        autoGraderTests.testDigraph2();
-        autoGraderTests.testDigraph3();
-        autoGraderTests.testDigraph3a();
-        autoGraderTests.testDigraph4();
-        autoGraderTests.testDigraph5();
-        autoGraderTests.testDigraph6();
-        // autoGraderTests.testDigraph9();
+        // autoGraderTests.testDigraphWordNet();
+        // autoGraderTests.testDigraph1();
+        // autoGraderTests.testDigraph2();
+        // autoGraderTests.testDigraph3();
+        // autoGraderTests.testDigraph3a();
+        // autoGraderTests.testDigraph4();
+        // autoGraderTests.testDigraph5();
+        // autoGraderTests.testDigraph6();
+        autoGraderTests.testDigraph9();
         autoGraderTests.createTwoObjects();
         autoGraderTests.testIterables();
     }

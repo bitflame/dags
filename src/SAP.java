@@ -93,7 +93,7 @@ public class SAP {
         st = new ST<>();
         int counter = n;
         while (!reversePost.isEmpty() && counter >= 0) {
-            st.put(reversePost.pop(), n);
+            st.put(reversePost.pop(), counter);
             counter--;
         }
         return st.keys();
