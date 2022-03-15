@@ -320,10 +320,24 @@ public class SAP {
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
+                            if (tempDistance < currentDistance) {
                                 ancestor = i;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                            // DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        } else if (id[i] == to) {
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance <= currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                                currentDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -345,16 +359,29 @@ public class SAP {
                             id[i] = id[v];
                         } else if (onToStack[i]) {
                             cycle = new Stack<>();
-                            for (int x = v; i != i; x = edgeTo[x]) cycle.push(x);
+                            for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
                             cycle.push(i);
                             cycle.push(v);
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
+                            if (tempDistance < currentDistance) {
                                 ancestor = i;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                            DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        } else if (id[i] == from) {
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance <= currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                                currentDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -378,10 +405,23 @@ public class SAP {
                             } else if (checkEdgeTo(i, v)) {
                                 // you found an ancestor
                                 tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance <= currentDistance) {
+                                if (tempDistance < currentDistance) {
                                     ancestor = i;
                                     currentDistance = tempDistance;
                                     minDistance = tempDistance;
+                                } else {
+                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                                }
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            } else if (id[i] == to) {
+                                tempDistance = DistTo[i] + DistTo[v] + 1;
+                                if (tempDistance <= currentDistance) {
+                                    ancestor = i;
+                                    minDistance = tempDistance;
+                                    currentDistance = tempDistance;
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -404,10 +444,23 @@ public class SAP {
                             } else if (checkEdgeTo(i, v)) {
                                 // you found an ancestor
                                 tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance <= currentDistance) {
+                                if (tempDistance < currentDistance) {
                                     ancestor = i;
                                     currentDistance = tempDistance;
                                     minDistance = tempDistance;
+                                } else {
+                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                                }
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            } else if (id[i] == from) {
+                                tempDistance = DistTo[i] + DistTo[v] + 1;
+                                if (tempDistance <= currentDistance) {
+                                    ancestor = i;
+                                    minDistance = tempDistance;
+                                    currentDistance = tempDistance;
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -431,10 +484,16 @@ public class SAP {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
+                        onToStack[i] = true;
+                    } else if (onToStack[i]) {
+                        cycle = new Stack<>();
+                        for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
+                        cycle.push(i);
+                        cycle.push(v);
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor
                         tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
+                        if (tempDistance < currentDistance) {
                             ancestor = i;
                             currentDistance = tempDistance;
                             minDistance = DistTo[i] + DistTo[v] + 1;
@@ -470,10 +529,16 @@ public class SAP {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
+                        onFromStack[i] = true;
+                    } else if (onFromStack[i]) {
+                        cycle = new Stack<>();
+                        for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
+                        cycle.push(i);
+                        cycle.push(v);
                     } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor
+                        // you found an ancestor - when there is a cycle the real distance is
                         tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
+                        if (tempDistance < currentDistance) {
                             ancestor = i;
                             currentDistance = tempDistance;
                             minDistance = tempDistance;
@@ -494,7 +559,7 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        DistTo[i] = DistTo[v] + 1;
+                        DistTo[i] = Math.min(DistTo[v] + 1, DistTo[i]);
                         edgeTo[i] = v;
                         id[i] = id[v];
                     }
@@ -592,7 +657,7 @@ public class SAP {
     }
 
     public static void main(String[] args) {
-        /*
+
         System.out.printf("****************************************Testing digraph3 \n");
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
@@ -644,9 +709,14 @@ public class SAP {
         System.out.printf("Expected ancestor: 2. Actual ancestor: %d\n", sap.ancestor(1, 2));
         System.out.printf("Test24 - (1, 13) expecting -1, getting: %d\n", sap.length(1, 13));
         System.out.printf("Expected ancestor: -1. Actual ancestor: %d\n", sap.ancestor(1, 13));
+        System.out.printf("Test25 - (9, 13) expecting 5, getting: %d\n", sap.length(9, 13));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(9, 13));
+        System.out.printf("Test24 - (13, 9) expecting 5, getting: %d\n", sap.length(13, 9));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(13, 9));
+
         System.out.printf("****************************************Testing digraph1 \n");
-        Digraph digraph = new Digraph(new In("digraph1.txt"));
-        SAP sap = new SAP(digraph);
+        digraph = new Digraph(new In("digraph1.txt"));
+        sap = new SAP(digraph);
         System.out.printf("Test 1 - (0, 2) expecting 1, getting: %d\n", sap.length(0, 2));
         System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 2));
         System.out.printf("Test 2 - (2, 0) expecting 1, getting: %d\n", sap.length(2, 0));
@@ -686,11 +756,11 @@ public class SAP {
         System.out.printf("Test 19 - (12, 0) expecting 4, getting: %d\n", sap.length(12, 0));
         System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(12, 0));
         System.out.printf("Test 20 - (0, 12) expecting 4, getting: %d\n", sap.length(0, 12));
-        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 12)); */
+        System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 12));
         System.out.printf("****************************************Testing digraph2 \n");
-        Digraph digraph = new Digraph(new In("digraph2.txt"));
-        SAP sap = new SAP(digraph);
-        System.out.printf("Test 1 - (1, 02) expecting 1, getting: %d\n", sap.length(1, 0));
+        digraph = new Digraph(new In("digraph2.txt"));
+        sap = new SAP(digraph);
+        System.out.printf("Test 1 - (1, 0) expecting 1, getting: %d\n", sap.length(1, 0));
         System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(1, 0));
         System.out.printf("Test 2 - (0, 1) expecting 1, getting: %d\n", sap.length(0, 1));
         System.out.printf("Expected ancestor: 0. Actual ancestor: %d\n", sap.ancestor(0, 1));
