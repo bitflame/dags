@@ -11,8 +11,6 @@ public class SAP {
     private final int n;
     private boolean[] marked;
     private boolean[] onStack;
-    private boolean[] onFromStack;
-    private boolean[] onToStack;
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
     Queue<Integer> pre;
@@ -287,8 +285,6 @@ public class SAP {
         DistTo = new int[n];
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
-        onFromStack = new boolean[n];
-        onToStack = new boolean[n];
         marked[from] = true;
         marked[to] = true;
         fromQueue.enqueue(from);
@@ -307,16 +303,10 @@ public class SAP {
                     for (int i : digraphDFCopy.adj(v)) {
                         if (!marked[i]) {
                             marked[i] = true;
-                            onFromStack[i] = true;
                             fromQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
                             id[i] = id[v];
-                        } else if (onFromStack[i]) {
-                            cycle = new Stack<>();
-                            for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
-                            cycle.push(i);
-                            cycle.push(v);
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -353,16 +343,10 @@ public class SAP {
                     for (int i : digraphDFCopy.adj(v)) {
                         if (!marked[i]) {
                             marked[i] = true;
-                            onToStack[i] = true;
                             toQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
                             id[i] = id[v];
-                        } else if (onToStack[i]) {
-                            cycle = new Stack<>();
-                            for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
-                            cycle.push(i);
-                            cycle.push(v);
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -488,12 +472,6 @@ public class SAP {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
-                        onToStack[i] = true;
-                    } else if (onToStack[i]) {
-                        cycle = new Stack<>();
-                        for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
-                        cycle.push(i);
-                        cycle.push(v);
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -534,12 +512,6 @@ public class SAP {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
-                        onFromStack[i] = true;
-                    } else if (onFromStack[i]) {
-                        cycle = new Stack<>();
-                        for (int x = v; x != i; x = edgeTo[x]) cycle.push(x);
-                        cycle.push(i);
-                        cycle.push(v);
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor - when there is a cycle the real distance is
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -667,7 +639,10 @@ public class SAP {
         System.out.printf("****************************************Testing digraph3 \n");
         Digraph digraph = new Digraph(new In("digraph3.txt"));
         SAP sap = new SAP(digraph);
-        System.out.printf("Test 1 - (13, 14) expecting 1, getting: %d\n", sap.length(13, 14));
+        int minDist = sap.length(13, 14);
+        if (minDist != 1) System.out.printf("Test 1 - (13, 14) expecting 1, getting: %d\n", minDist);
+        else System.out.printf("Test 1 passed.\n");
+
         System.out.printf("Expected ancestor: 14. Actual ancestor: %d\n", sap.ancestor(13, 14));
         System.out.printf("Test 2 - (14, 13) expecting 1, getting: %d\n", sap.length(14, 13));
         System.out.printf("Expected ancestor: 14. Actual ancestor: %d\n", sap.ancestor(14, 13));

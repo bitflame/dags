@@ -32,28 +32,28 @@ public class AutoGraderTests {
                     shortestDistance);
         else System.out.println("Test 1 - 64451, 25327 passed ");
 
-        // shortestDistance = sap.length(35205, 21385);
-        // if (shortestDistance != 17)
-        //System.out.printf("shortest distance between 35205, and 21385 should be 17, but it is: %d\n",
-          //          shortestDistance);
-        // else System.out.println("Test 2 - 35205, 21385 passed ");
+         shortestDistance = sap.length(35205, 21385);
+         if (shortestDistance != 17)
+        System.out.printf("shortest distance between 35205, and 21385 should be 17, but it is: %d\n",
+                    shortestDistance);
+         else System.out.println("Test 2 - 35205, 21385 passed ");
 
 
-        //shortestDistance = sap.length(53712, 61827);
-        //if (shortestDistance != 10)
-            //System.out.printf("shortest distance between 53712, and 61827 should be 10, but it is: %d\n",
-                    //shortestDistance);
-        //else System.out.println("Test 3 - 53712, 61827 passed ");
+        shortestDistance = sap.length(53712, 61827);
+        if (shortestDistance != 10)
+        System.out.printf("shortest distance between 53712, and 61827 should be 10, but it is: %d\n",
+        shortestDistance);
+        else System.out.println("Test 3 - 53712, 61827 passed ");
         shortestDistance = sap.length(45826, 73382);
         if (shortestDistance != 14)
             System.out.printf("shortest distance between 45826, and 73382 should be 14, but it is: %d\n ",
                     shortestDistance);
         else System.out.println("Test 4 - 45826, 73382 passed ");
-        //shortestDistance = sap.length(2657, 55738);
-        //if (shortestDistance != 15)
-            //System.out.printf("shortest distance between 2657, and 55738 should be 15, but it is: %d\n ",
-              //      shortestDistance);
-        //else System.out.println("Test 5 - 2657, 55738 passed ");
+        shortestDistance = sap.length(2657, 55738);
+        if (shortestDistance != 15)
+            System.out.printf("shortest distance between 2657, and 55738 should be 15, but it is: %d\n ",
+                    shortestDistance);
+        else System.out.println("Test 5 - 2657, 55738 passed ");
     }
 
     private void testSubgraphs() {
