@@ -245,17 +245,18 @@ public class SAP {
     /* y is x's current parent. The one that is supposed to be updated edgeTo but is not so we don't lose track of the
      * previous edgeTo */
     private boolean checkEdgeTo(int x, int y) {
+        // System.out.printf("************checkEdge activated for %d %d ********************\n.", from, to);
         hops = 0;
         // x should have a path to one end and its parent to the other end
-        for (; x != from && x != to && !hasCycle(); x = edgeTo[x]) {
+        for (; x != from && x != to; x = edgeTo[x]) {
             hops++;
         }
         hops++;
         // now check x's parent to make sure it can get  to the other end
-        for (; y != from && y != to && !hasCycle(); y = edgeTo[y]) {
+        for (; y != from && y != to && edgeTo[y] != y; y = edgeTo[y]) {
             hops++;
         }
-        return ((x == from && y == to) || (x == to && y == from) || (hasCycle() && x == to && y == to) || (hasCycle() && x == from && y == from));
+        return ((x == from && y == to) || (x == to && y == from));
     }
 
     /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
@@ -291,7 +292,7 @@ public class SAP {
         toQueue.enqueue(to);
         DistTo[from] = 0;
         DistTo[to] = 0;
-        int nodeDistance = 0;
+        int nodeDistance = 1;
         int v = 0;
         int currentDistance = INFINITY;
         int tempDistance = 0;
@@ -692,8 +693,12 @@ public class SAP {
         System.out.printf("Expected ancestor: -1. Actual ancestor: %d\n", sap.ancestor(1, 13));
         System.out.printf("Test25 - (9, 13) expecting 5, getting: %d\n", sap.length(9, 13));
         System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(9, 13));
-        System.out.printf("Test24 - (13, 9) expecting 5, getting: %d\n", sap.length(13, 9));
+        System.out.printf("Test26 - (13, 9) expecting 5, getting: %d\n", sap.length(13, 9));
         System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(13, 9));
+        System.out.printf("Test27 - (8, 14) expecting 4, getting: %d\n", sap.length(8, 14));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(8, 14));
+        System.out.printf("Test28 - (14, 8) expecting 4, getting: %d\n", sap.length(14, 8));
+        System.out.printf("Expected ancestor: 11. Actual ancestor: %d\n", sap.ancestor(14, 8));
 
         System.out.printf("****************************************Testing digraph1 \n");
         digraph = new Digraph(new In("digraph1.txt"));
