@@ -248,12 +248,12 @@ public class SAP {
         // System.out.printf("************checkEdge activated for %d %d ********************\n.", from, to);
         hops = 0;
         // x should have a path to one end and its parent to the other end
-        for (; x != from && x != to ; x = edgeTo[x]) {
+        for (; x != from && x != to; x = edgeTo[x]) {
             hops++;
         }
         hops++;
         // now check x's parent to make sure it can get  to the other end
-        for (; y != from && y != to ; y = edgeTo[y]) {
+        for (; y != from && y != to; y = edgeTo[y]) {
             hops++;
         }
         return ((x == from && y == to) || (x == to && y == from));
@@ -315,6 +315,10 @@ public class SAP {
                                 ancestor = i;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
+                                // DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+                                // DistTo[i]=DistTo[v]+1;
+                                // edgeTo[i]=v;
+                                // id[i]=id[v];
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -322,6 +326,7 @@ public class SAP {
                             // DistTo[i] = Math.min(DistTo[i], DistTo[v] + 1);
                             // DistTo[i] = DistTo[v] + 1;
                             if (DistTo[v] + 1 < DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             }
@@ -331,14 +336,23 @@ public class SAP {
                                 ancestor = i;
                                 minDistance = tempDistance;
                                 currentDistance = tempDistance;
+                                // DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+                                // edgeTo[i]=v;
+                                // id[i]=id[v];
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
                             if (DistTo[v] + 1 < DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             }
+                        }
+                        if (DistTo[v] + 1 < DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
                         }
                     }
                 } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
@@ -357,31 +371,44 @@ public class SAP {
                                 ancestor = i;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
+//                                DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                                edgeTo[i]=v;
+//                                id[i]=id[v];
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
                             // DistTo[i] = DistTo[v] + 1;
                             if (DistTo[v] + 1 < DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
                                 edgeTo[i] = v;
                                 id[i] = id[v];
                             }
+
                         } else if (id[i] == from) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance <= currentDistance) {
                                 ancestor = i;
                                 minDistance = tempDistance;
                                 currentDistance = tempDistance;
+//                                DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                                edgeTo[i]=v;
+//                                id[i]=id[v];
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                            if (DistTo[v] + 1 < DistTo[i]) {
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            }
+//                            if (DistTo[v] + 1 < DistTo[i]) {
+//                                DistTo[i] = DistTo[v] + 1;
+//                                edgeTo[i] = v;
+//                                id[i] = id[v];
+//                            }
                         }
-
+                        if (DistTo[v] + 1 < DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
                     }
                 } else if (!hasCycle()) {
                     if (st.get(fromQueue.peek()) < st.get(toQueue.peek())) {
@@ -400,29 +427,41 @@ public class SAP {
                                     ancestor = i;
                                     currentDistance = tempDistance;
                                     minDistance = tempDistance;
+//                                    DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                                    edgeTo[i]=v;
+//                                    id[i]=id[v];
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
                                 // DistTo[i] = DistTo[v] + 1;
-                                if (DistTo[v] + 1 < DistTo[i]) {
-                                    edgeTo[i] = v;
-                                    id[i] = id[v];
-                                }
+//                                if (DistTo[v] + 1 < DistTo[i]) {
+//                                    DistTo[i] = DistTo[v] + 1;
+//                                    edgeTo[i] = v;
+//                                    id[i] = id[v];
+//                                }
                             } else if (id[i] == to) {
                                 tempDistance = DistTo[i] + DistTo[v] + 1;
                                 if (tempDistance <= currentDistance) {
                                     ancestor = i;
                                     minDistance = tempDistance;
                                     currentDistance = tempDistance;
+                                    DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+                                    edgeTo[i]=v;
+                                    id[i]=id[v];
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                if (DistTo[v] + 1 < DistTo[i]) {
-                                    edgeTo[i] = v;
-                                    id[i] = id[v];
-                                }
+//                                if (DistTo[v] + 1 < DistTo[i]) {
+//                                    edgeTo[i] = v;
+//                                    id[i] = id[v];
+//                                }
+                            }
+                            if (DistTo[v] + 1 < DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
                             }
                         }
                         nodeDistance = v;
@@ -442,29 +481,41 @@ public class SAP {
                                     ancestor = i;
                                     currentDistance = tempDistance;
                                     minDistance = tempDistance;
+//                                    DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                                    edgeTo[i]=v;
+//                                    id[i]=id[v];
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
                                 // DistTo[i] = DistTo[v] + 1;
-                                if (DistTo[v] + 1 < DistTo[i]) {
-                                    edgeTo[i] = v;
-                                    id[i] = id[v];
-                                }
+//                                if (DistTo[v] + 1 < DistTo[i]) {
+//                                    DistTo[i] = DistTo[v] + 1;
+//                                    edgeTo[i] = v;
+//                                    id[i] = id[v];
+//                                }
                             } else if (id[i] == from) {
                                 tempDistance = DistTo[i] + DistTo[v] + 1;
                                 if (tempDistance <= currentDistance) {
                                     ancestor = i;
                                     minDistance = tempDistance;
                                     currentDistance = tempDistance;
+//                                    DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                                    edgeTo[i]=v;
+//                                    id[i]=id[v];
                                 } else {
                                     while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                     while (!toQueue.isEmpty()) toQueue.dequeue();
                                 }
-                                if (DistTo[v] + 1 < DistTo[i]) {
-                                    edgeTo[i] = v;
-                                    id[i] = id[v];
-                                }
+//                                if (DistTo[v] + 1 < DistTo[i]) {
+//                                    edgeTo[i] = v;
+//                                    id[i] = id[v];
+//                                }
+                            }
+                            if (DistTo[v] + 1 < DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
                             }
                         }
                         nodeDistance = v;
@@ -488,21 +539,28 @@ public class SAP {
                             ancestor = i;
                             currentDistance = tempDistance;
                             minDistance = DistTo[i] + DistTo[v] + 1;
+//                            DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                            edgeTo[i]=v;
+//                            id[i]=id[v];
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
                         // DistTo[i] = DistTo[v] + 1;
-                        if (DistTo[v] + 1 < DistTo[i]) {
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
+//                        if (DistTo[v] + 1 < DistTo[i]) {
+//                            DistTo[i] = DistTo[v] + 1;
+//                            edgeTo[i] = v;
+//                            id[i] = id[v];
+//                        }
                     } else if (id[i] == from) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance <= currentDistance) {
                             ancestor = i;
                             minDistance = tempDistance;
                             currentDistance = tempDistance;
+//                            DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                            edgeTo[i]=v;
+//                            id[i]=id[v];
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
@@ -511,6 +569,11 @@ public class SAP {
                             edgeTo[i] = v;
                             id[i] = id[v];
                         }
+                    }
+                    if (DistTo[v] + 1 < DistTo[i]) {
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
                     }
                 }
             }
@@ -523,6 +586,7 @@ public class SAP {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
                         id[i] = id[v];
+
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor - when there is a cycle the real distance is
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -530,29 +594,41 @@ public class SAP {
                             ancestor = i;
                             currentDistance = tempDistance;
                             minDistance = tempDistance;
+//                            DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                            edgeTo[i]=v;
+//                            id[i]=id[v];
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
                         // DistTo[i] = DistTo[v] + 1;
-                        if (DistTo[v] + 1 < DistTo[i]) {
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
+//                        if (DistTo[v] + 1 < DistTo[i]) {
+//                            DistTo[i] = DistTo[v] + 1;
+//                            edgeTo[i] = v;
+//                            id[i] = id[v];
+//                        }
                     } else if (id[i] == to) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance <= currentDistance) {
                             ancestor = i;
                             minDistance = tempDistance;
                             currentDistance = tempDistance;
+//                            DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
+//                            edgeTo[i]=v;
+//                            id[i]=id[v];
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        if (DistTo[v] + 1 < DistTo[i]) {
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
+//                        if (DistTo[v] + 1 < DistTo[i]) {
+//                            edgeTo[i] = v;
+//                            id[i] = id[v];
+//                        }
+                    }
+                    if (DistTo[v] + 1 < DistTo[i]) {
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
                     }
                 }
             }

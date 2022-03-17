@@ -433,7 +433,7 @@ public class AutoGraderTests {
         digraph = new Digraph(in);
         sap = new SAP(digraph);
         shortestDistance = sap.length(8, 13);
-        if (shortestDistance != 6)
+        if (shortestDistance != 5)
             System.out.printf("The distance between 8 and 13 should be 5, but it is: %d\n", shortestDistance);
         ancestor = sap.ancestor(8, 13);
         if (ancestor != 8)
