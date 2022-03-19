@@ -524,15 +524,17 @@ public class AutoGraderTests {
         in = new In("digraph9.txt");
         digraph = new Digraph(in);
         sap = new SAP(digraph);
+        shortestDistance = sap.length(0, 1);
+        if (shortestDistance != 2)
+            System.out.printf("The distance between 0 and 1 should be 2, but it is: %d\n", shortestDistance);
+        ancestor = sap.length(0, 1);
+        if (ancestor != 3) System.out.printf("The ancestor between 0 and 1 should be 3, but it is: %d\n", ancestor);
         shortestDistance = sap.length(7, 8);
         if (shortestDistance != -1)
             System.out.printf("The distance between 7 and 8 should be -1, but it is: %d\n", shortestDistance);
         shortestDistance = sap.length(7, 4);
         if (shortestDistance != 3)
             System.out.printf("The distance between 7, and 4 should be 3, but it is: %d\n", shortestDistance);
-        shortestDistance = sap.length(4, 0);
-        if (shortestDistance != 3)
-            System.out.printf("The distance between 4, and 0 should be 3, but it is: %d\n", shortestDistance);
         shortestDistance = sap.length(7, 3);
         if (shortestDistance != 2)
             System.out.printf("The distance between 7, and 3 should be 2, but it is: %d\n", shortestDistance);
@@ -656,7 +658,7 @@ public class AutoGraderTests {
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
         //autoGraderTests.troubleShooting();
-        //autoGraderTests.testDigraphWordNet();
+        // autoGraderTests.testDigraphWordNet();
         autoGraderTests.testDigraph1();
         autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();

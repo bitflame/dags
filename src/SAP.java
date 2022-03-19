@@ -17,6 +17,8 @@ public class SAP {
     private boolean[] onStack;
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
+    Stack<Integer> fromStack;
+    Stack<Integer> toStack;
     Queue<Integer> pre;
     Queue<Integer> postOrder;
     Queue<Integer> fromQueue;
@@ -307,6 +309,11 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
+                            if (DistTo[v] + 1 <= DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            }
                         } else if (id[i] == to) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance <= currentDistance) {
@@ -317,46 +324,52 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            if (DistTo[v] + 1 <= DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
                             fromQueue.enqueue(i);
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            DistTo[v] = DistTo[i] + 1;
+                            edgeTo[v] = i;
+                            id[v] = id[i];
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance < currentDistance) {
-                                ancestor = i;
+                                //ancestor = i;
+                                ancestor = v;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                            if (DistTo[i] + 1 <= DistTo[v]) {
+                                DistTo[v] = DistTo[i] + 1;
+                                edgeTo[v] = i;
+                                id[v] = id[i];
                             }
                         } else if (id[i] == to) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance <= currentDistance) {
-                                ancestor = i;
+                                ancestor = v;
                                 minDistance = tempDistance;
                                 currentDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            if (DistTo[i] + 1 <= DistTo[i]) {
+                                DistTo[v] = DistTo[i] + 1;
+                                edgeTo[v] = i;
+                                id[v] = id[i];
+                            }
                         }
                     }
                 } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
@@ -379,6 +392,11 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
+                            if (DistTo[v] + 1 <= DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            }
                         } else if (id[i] == from) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance <= currentDistance) {
@@ -389,46 +407,53 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            if (DistTo[v] + 1 <= DistTo[i]) {
+                                DistTo[i] = DistTo[v] + 1;
+                                edgeTo[i] = v;
+                                id[i] = id[v];
+                            }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
                             toQueue.enqueue(i);
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            DistTo[v] = DistTo[i] + 1;
+                            edgeTo[v] = i;
+                            id[v] = id[i];
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance < currentDistance) {
-                                ancestor = i;
+                                // ancestor = i;
+                                ancestor = v;
                                 currentDistance = tempDistance;
                                 minDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                            if (DistTo[i] + 1 <= DistTo[v]) {
+                                DistTo[v] = DistTo[i] + 1;
+                                edgeTo[v] = i;
+                                id[v] = id[i];
                             }
                         } else if (id[i] == from) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
                             if (tempDistance <= currentDistance) {
-                                ancestor = i;
+                                // ancestor = i;
+                                ancestor = v;
                                 minDistance = tempDistance;
                                 currentDistance = tempDistance;
                             } else {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                            if (DistTo[i] + 1 <= DistTo[v]) {
+                                DistTo[v] = DistTo[i] + 1;
+                                edgeTo[v] = i;
+                                id[v] = id[i];
+                            }
                         }
                     }
                 }
@@ -454,6 +479,11 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
                     } else if (id[i] == from) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance <= currentDistance) {
@@ -469,49 +499,46 @@ public class SAP {
                             id[i] = id[v];
                         }
                     }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-                    }
                 }
-                for(int i: digraphDFCopy.reverse().adj(v)){
+                for (int i : digraphDFCopy.reverse().adj(v)) {
                     if (!marked[i]) {
                         marked[i] = true;
                         toQueue.enqueue(i);
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        DistTo[v] = DistTo[i] + 1;
+                        edgeTo[v] = i;
+                        id[v] = id[i];
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance < currentDistance) {
-                            ancestor = i;
+                            // ancestor = i;
+                            ancestor = v;
                             currentDistance = tempDistance;
                             minDistance = DistTo[i] + DistTo[v] + 1;
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
+                        if (DistTo[i] + 1 <= DistTo[v]) {
+                            DistTo[v] = DistTo[i] + 1;
+                            edgeTo[v] = i;
+                            id[v] = id[i];
+                        }
                     } else if (id[i] == from) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance <= currentDistance) {
-                            ancestor = i;
+                            // ancestor = i;
+                            ancestor = from;
                             minDistance = tempDistance;
                             currentDistance = tempDistance;
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        if (DistTo[v] + 1 < DistTo[i]) {
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                        if (DistTo[i] + 1 < DistTo[v]) {
+                            edgeTo[v] = i;
+                            id[v] = id[i];
                         }
-                    }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
                     }
                 }
             }
@@ -536,6 +563,11 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
                     } else if (id[i] == to) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance <= currentDistance) {
@@ -546,11 +578,11 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                    }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
                     }
                 }
                 for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
@@ -565,12 +597,18 @@ public class SAP {
                         // you found an ancestor - when there is a cycle the real distance is
                         tempDistance = DistTo[i] + DistTo[v] + 1;
                         if (tempDistance < currentDistance) {
-                            ancestor = i;
+                            // ancestor = i;
+                            ancestor = v;
                             currentDistance = tempDistance;
                             minDistance = tempDistance;
                         } else {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
+                        }
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
                         }
                     } else if (id[i] == to) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -582,11 +620,11 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                    }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
                     }
                 }
             }
