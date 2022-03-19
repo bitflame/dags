@@ -1,4 +1,8 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.ST;
+import edu.princeton.cs.algs4.In;
 
 import java.util.Iterator;
 
@@ -44,10 +48,10 @@ public class SAP {
             id[i] = i;
             edgeTo[i] = i;
         }
-        for (int i = 0; i < n; i++) {
-            if (!marked[i]) dfs(digraphDFCopy, i);
-        }
-        reversePostOrder();
+//        for (int i = 0; i < n; i++) {
+//            if (!marked[i]) dfs(digraphDFCopy, i);
+//        }
+//        reversePostOrder();
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
@@ -259,22 +263,6 @@ public class SAP {
         return ((x == from && y == to) || (x == to && y == from));
     }
 
-    /* todo write another lockstep, and check to make sure all the nodes with distance 1 from x are used, before using
-        nodes with distance 2 and on and on. Use a distance counter, and a conditional that checks to see if the next node
-         is further before it moves on. And use the reversePost to give priority to the vertex that is "smaller" in
-        topological order. I can only assume that it means it is closer to the sink, but will have to validate this. Also
-        use a method like find() to traverse edgeTo and connected to check the ids. Find out why reversePost for digraph3
-         is missing some nodes and see what can be done about digraphs with two cycles
-         how should I deal with graphs with multiple circuits
-         check the reverse order of other graphs and make sure all the nodes are there
-         in postorder children return first
-         if the ids are the same or find can traverse to both ends from the current node, that node is the ancestor. I have to
-         update the id[] in bfs, since dfs() only updates !marked, and this might apply to edgeTo also. I may have to do it again
-         in bfs() or just do it in bfs(). Given that I am using the data in bfs, it might be better to do it twice, so I can use
-         the original as a cache and if only run bfs, if the ids do not match or something. I think the answer is I have
-         to update in a way that I get the result I want. That means id has to be updated in bfs() and I have to review the rest.
-         I should try to add the cycle detection to the lockstep-bfs also
-         */
     private void lockStepBFS() {
         marked = new boolean[n];
         edgeTo = new int[n];
@@ -301,7 +289,42 @@ public class SAP {
             if (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
                 if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
                     v = fromQueue.dequeue();
-                    for (int i : digraphDFCopy.adj(v)) {
+                    for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                        if (!marked[i]) {
+                            marked[i] = true;
+                            fromQueue.enqueue(i);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        } else if (checkEdgeTo(i, v)) {
+                            // you found an ancestor
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance < currentDistance) {
+                                ancestor = i;
+                                currentDistance = tempDistance;
+                                minDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                        } else if (id[i] == to) {
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance <= currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                                currentDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
+                            }
+                        }
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
+                    }
+                    for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
                             fromQueue.enqueue(i);
@@ -338,7 +361,7 @@ public class SAP {
                     }
                 } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
                     v = toQueue.dequeue();
-                    for (int i : digraphDFCopy.adj(v)) {
+                    for (int i : digraphDFCopy.adj(v)) {  // find outgoing neighbors
                         if (!marked[i]) {
                             marked[i] = true;
                             toQueue.enqueue(i);
@@ -373,93 +396,86 @@ public class SAP {
                             id[i] = id[v];
                         }
                     }
-                } else if (!hasCycle()) {
-                    if (st.get(fromQueue.peek()) < st.get(toQueue.peek())) {
-                        v = fromQueue.dequeue();
-                        for (int i : digraphDFCopy.adj(v)) {
-                            if (!marked[i]) {
-                                marked[i] = true;
-                                fromQueue.enqueue(i);
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            } else if (checkEdgeTo(i, v)) {
-                                // you found an ancestor
-                                tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance < currentDistance) {
-                                    ancestor = i;
-                                    currentDistance = tempDistance;
-                                    minDistance = tempDistance;
-                                } else {
-                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                    while (!toQueue.isEmpty()) toQueue.dequeue();
-                                }
-                            } else if (id[i] == to) {
-                                tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance <= currentDistance) {
-                                    ancestor = i;
-                                    minDistance = tempDistance;
-                                    currentDistance = tempDistance;
-                                    DistTo[i]=Math.min(DistTo[v]+1,DistTo[i]);
-                                    edgeTo[i]=v;
-                                    id[i]=id[v];
-                                } else {
-                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                    while (!toQueue.isEmpty()) toQueue.dequeue();
-                                }
+                    for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
+                        if (!marked[i]) {
+                            marked[i] = true;
+                            toQueue.enqueue(i);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        } else if (checkEdgeTo(i, v)) {
+                            // you found an ancestor
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance < currentDistance) {
+                                ancestor = i;
+                                currentDistance = tempDistance;
+                                minDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
+                        } else if (id[i] == from) {
+                            tempDistance = DistTo[i] + DistTo[v] + 1;
+                            if (tempDistance <= currentDistance) {
+                                ancestor = i;
+                                minDistance = tempDistance;
+                                currentDistance = tempDistance;
+                            } else {
+                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                                while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
                         }
-                        nodeDistance = v;
-                    } else if (st.get(toQueue.peek()) < st.get(fromQueue.peek())) {
-                        v = toQueue.dequeue();
-                        for (int i : digraphDFCopy.adj(v)) {
-                            if (!marked[i]) {
-                                marked[i] = true;
-                                toQueue.enqueue(i);
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            } else if (checkEdgeTo(i, v)) {
-                                // you found an ancestor
-                                tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance < currentDistance) {
-                                    ancestor = i;
-                                    currentDistance = tempDistance;
-                                    minDistance = tempDistance;
-                                } else {
-                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                    while (!toQueue.isEmpty()) toQueue.dequeue();
-                                }
-                            } else if (id[i] == from) {
-                                tempDistance = DistTo[i] + DistTo[v] + 1;
-                                if (tempDistance <= currentDistance) {
-                                    ancestor = i;
-                                    minDistance = tempDistance;
-                                    currentDistance = tempDistance;
-                                } else {
-                                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                    while (!toQueue.isEmpty()) toQueue.dequeue();
-                                }
-                            }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            }
+                        if (DistTo[v] + 1 <= DistTo[i]) {
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[i] = v;
+                            id[i] = id[v];
                         }
-                        nodeDistance = v;
                     }
                 }
             }
             if (!toQueue.isEmpty() && DistTo[toQueue.peek()] <= nodeDistance) {
                 // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
                 v = toQueue.dequeue();
-                for (int i : digraphDFCopy.adj(v)) {
+                for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                    if (!marked[i]) {
+                        marked[i] = true;
+                        toQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    } else if (checkEdgeTo(i, v)) {
+                        // you found an ancestor
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance < currentDistance) {
+                            ancestor = i;
+                            currentDistance = tempDistance;
+                            minDistance = DistTo[i] + DistTo[v] + 1;
+                        } else {
+                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                            while (!toQueue.isEmpty()) toQueue.dequeue();
+                        }
+                    } else if (id[i] == from) {
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance <= currentDistance) {
+                            ancestor = i;
+                            minDistance = tempDistance;
+                            currentDistance = tempDistance;
+                        } else {
+                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                            while (!toQueue.isEmpty()) toQueue.dequeue();
+                        }
+                        if (DistTo[v] + 1 < DistTo[i]) {
+                            edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
+                    }
+                    if (DistTo[v] + 1 <= DistTo[i]) {
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                }
+                for(int i: digraphDFCopy.reverse().adj(v)){
                     if (!marked[i]) {
                         marked[i] = true;
                         toQueue.enqueue(i);
@@ -501,7 +517,43 @@ public class SAP {
             }
             if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] <= nodeDistance) {
                 v = fromQueue.dequeue();
-                for (int i : digraphDFCopy.adj(v)) {
+                for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                    if (!marked[i]) {
+                        marked[i] = true;
+                        fromQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+
+                    } else if (checkEdgeTo(i, v)) {
+                        // you found an ancestor - when there is a cycle the real distance is
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance < currentDistance) {
+                            ancestor = i;
+                            currentDistance = tempDistance;
+                            minDistance = tempDistance;
+                        } else {
+                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                            while (!toQueue.isEmpty()) toQueue.dequeue();
+                        }
+                    } else if (id[i] == to) {
+                        tempDistance = DistTo[i] + DistTo[v] + 1;
+                        if (tempDistance <= currentDistance) {
+                            ancestor = i;
+                            minDistance = tempDistance;
+                            currentDistance = tempDistance;
+                        } else {
+                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                            while (!toQueue.isEmpty()) toQueue.dequeue();
+                        }
+                    }
+                    if (DistTo[v] + 1 <= DistTo[i]) {
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                }
+                for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                     if (!marked[i]) {
                         marked[i] = true;
                         fromQueue.enqueue(i);
@@ -544,89 +596,6 @@ public class SAP {
             minDistance = -1;
             ancestor = -1;
         }
-    }
-    /*private void lockStepBFS(int f, int t) {
-        marked = new boolean[n];
-        Queue<Integer> fromQueue = new Queue<>();
-        Queue<Integer> toQueue = new Queue<>();
-        fromQueue.enqueue(f);
-        toQueue.enqueue(t);
-        marked[f] = true;
-        marked[t] = true;
-        DistTo[f] = 0;
-        DistTo[t] = 0;
-        int currentDistance = INFINITY;
-        int currentAncestor = -1;
-        int temp = 0;
-        while (!(fromQueue.isEmpty() && toQueue.isEmpty())) {
-            if (!fromQueue.isEmpty()) {
-                int v = fromQueue.dequeue();
-                if (print)
-                    System.out.printf("took %d from fromQueue \n", v);
-                for (int j : digraphDFCopy.adj(v)) {
-                    if (!marked[j]) {
-                        marked[j] = true;
-                        DistTo[j] = DistTo[v] + 1;
-                        id[j] = id[v];
-                        edgeTo[j] = v;
-                        fromQueue.enqueue(j);
-                    } else {
-                        if (connected(f, t)) {
-                            currentDistance = DistTo[j] + DistTo[v] + 1;
-                            currentAncestor = j;
-                        } else {
-                            edgeTo[j] = v;
-                        }
-                    }
-                }
-            }
-            if (!toQueue.isEmpty()) {
-                int w = toQueue.dequeue();
-                if (print)
-                    System.out.printf("took %d from toQueue \n", w);
-                for (int k : digraphDFCopy.adj(w)) {
-                    if (!marked[k]) {
-                        marked[k] = true;
-                        DistTo[k] = DistTo[w] + 1;
-                        id[k] = id[w];
-                        edgeTo[k] = w;
-                        toQueue.enqueue(k);
-                    } else {
-                        if (connected(f, t)) {
-                            currentAncestor = k;
-                            currentDistance = DistTo[k] + DistTo[w] + 1;
-                        } else {
-                            edgeTo[k] = w;
-                        }
-                    }
-                }
-            }
-        }
-        if (currentDistance == INFINITY) {
-            minDistance = -1;
-            ancestor = -1;
-        } else if (currentAncestor == -1) {
-            return;
-        } else {
-            minDistance = currentDistance;
-            ancestor = currentAncestor;
-        }
-    }*/
-
-    private boolean testEdgeTo(int ancestor, int destination) {
-        // System.out.printf("inside testEdge for " + from + " and " + to);
-        if (ancestor == destination)
-            return true;
-        int i = ancestor;
-        int counter = 0;
-        for (; i != destination && counter < n; i = edgeTo[i]) {
-            if (i == -1)
-                break;
-            counter++;
-            // System.out.print(" " + i);
-        }
-        // if (i != -1) System.out.print(" " + i);
-        return (i == destination);
     }
 
     public static void main(String[] args) {

@@ -433,8 +433,8 @@ public class AutoGraderTests {
         digraph = new Digraph(in);
         sap = new SAP(digraph);
         shortestDistance = sap.length(8, 13);
-        if (shortestDistance != 5)
-            System.out.printf("The distance between 8 and 13 should be 5, but it is: %d\n", shortestDistance);
+        if (shortestDistance != 6)
+            System.out.printf("The distance between 8 and 13 should be 6, but it is: %d\n", shortestDistance);
         ancestor = sap.ancestor(8, 13);
         if (ancestor != 8)
             System.out.printf("The value of ancestor between 8 and 13 should be 8, but it is: %d\n", ancestor);
@@ -655,8 +655,8 @@ public class AutoGraderTests {
 
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
-        // autoGraderTests.troubleShooting();
-        autoGraderTests.testDigraphWordNet();
+        //autoGraderTests.troubleShooting();
+        //autoGraderTests.testDigraphWordNet();
         autoGraderTests.testDigraph1();
         autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
