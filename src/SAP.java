@@ -15,6 +15,8 @@ public class SAP {
     private final int n;
     private boolean[] marked;
     private boolean[] onStack;
+    private boolean [] onFromStack;
+    private boolean [] onToStack;
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
     Stack<Integer> fromStack;
@@ -276,6 +278,8 @@ public class SAP {
         DistTo = new int[n];
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
+        fromStack = new edu.princeton.cs.algs4.Stack<>();
+        toStack = new edu.princeton.cs.algs4.Stack<>();
         marked[from] = true;
         marked[to] = true;
         fromQueue.enqueue(from);
@@ -334,10 +338,11 @@ public class SAP {
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
-                            fromQueue.enqueue(i);
+                            onFromStack[i]=true;
+                            fromStack.push(i);
                             DistTo[v] = DistTo[i] + 1;
                             edgeTo[v] = i;
-                            id[v] = id[i];
+                            id[i] = id[v];
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -353,7 +358,8 @@ public class SAP {
                             if (DistTo[i] + 1 <= DistTo[v]) {
                                 DistTo[v] = DistTo[i] + 1;
                                 edgeTo[v] = i;
-                                id[v] = id[i];
+                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                                // id for all the connected nodes
                             }
                         } else if (id[i] == to) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -365,10 +371,11 @@ public class SAP {
                                 while (!fromQueue.isEmpty()) fromQueue.dequeue();
                                 while (!toQueue.isEmpty()) toQueue.dequeue();
                             }
-                            if (DistTo[i] + 1 <= DistTo[i]) {
+                            if (DistTo[i] + 1 <= DistTo[v]) {
                                 DistTo[v] = DistTo[i] + 1;
                                 edgeTo[v] = i;
-                                id[v] = id[i];
+                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                                // id for all the connected nodes
                             }
                         }
                     }
