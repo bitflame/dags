@@ -15,8 +15,8 @@ public class SAP {
     private final int n;
     private boolean[] marked;
     private boolean[] onStack;
-    private boolean [] onFromStack;
-    private boolean [] onToStack;
+    private boolean[] onFromStack;
+    private boolean[] onToStack;
     Stack<Integer> cycle;
     Stack<Integer> reversePost;
     Stack<Integer> fromStack;
@@ -338,7 +338,7 @@ public class SAP {
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
-                            onFromStack[i]=true;
+                            onFromStack[i] = true;
                             fromStack.push(i);
                             DistTo[v] = DistTo[i] + 1;
                             edgeTo[v] = i;
@@ -424,10 +424,12 @@ public class SAP {
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
                             marked[i] = true;
-                            toQueue.enqueue(i);
+                            onToStack[i] = true;
+                            toStack.push(i);
                             DistTo[v] = DistTo[i] + 1;
                             edgeTo[v] = i;
-                            id[v] = id[i];
+                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                            // id for all the connected nodes
                         } else if (checkEdgeTo(i, v)) {
                             // you found an ancestor
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -443,7 +445,8 @@ public class SAP {
                             if (DistTo[i] + 1 <= DistTo[v]) {
                                 DistTo[v] = DistTo[i] + 1;
                                 edgeTo[v] = i;
-                                id[v] = id[i];
+                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                                // id for all the connected nodes
                             }
                         } else if (id[i] == from) {
                             tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -459,7 +462,8 @@ public class SAP {
                             if (DistTo[i] + 1 <= DistTo[v]) {
                                 DistTo[v] = DistTo[i] + 1;
                                 edgeTo[v] = i;
-                                id[v] = id[i];
+                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                                // id for all the connected nodes
                             }
                         }
                     }
@@ -510,10 +514,11 @@ public class SAP {
                 for (int i : digraphDFCopy.reverse().adj(v)) {
                     if (!marked[i]) {
                         marked[i] = true;
-                        toQueue.enqueue(i);
+                        onToStack[i] = true;
+                        toStack.push(i);
                         DistTo[v] = DistTo[i] + 1;
                         edgeTo[v] = i;
-                        id[v] = id[i];
+                        id[i] = id[v];
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -529,7 +534,8 @@ public class SAP {
                         if (DistTo[i] + 1 <= DistTo[v]) {
                             DistTo[v] = DistTo[i] + 1;
                             edgeTo[v] = i;
-                            id[v] = id[i];
+                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                            // id for all the connected nodes
                         }
                     } else if (id[i] == from) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -544,7 +550,8 @@ public class SAP {
                         }
                         if (DistTo[i] + 1 < DistTo[v]) {
                             edgeTo[v] = i;
-                            id[v] = id[i];
+                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                            // id for all the connected nodes
                         }
                     }
                 }
@@ -595,11 +602,12 @@ public class SAP {
                 for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                     if (!marked[i]) {
                         marked[i] = true;
-                        fromQueue.enqueue(i);
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-
+                        onFromStack[i] = true;
+                        fromStack.push(i);
+                        DistTo[v] = DistTo[i] + 1;
+                        edgeTo[v] = i;
+                        id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                        // id for all the connected nodes
                     } else if (checkEdgeTo(i, v)) {
                         // you found an ancestor - when there is a cycle the real distance is
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -612,10 +620,12 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                        if (DistTo[i] + 1 <= DistTo[v]) {
+                            DistTo[v] = DistTo[i] + 1;
+                            // maybe I should build a method to update the distance to all of v's children?
+                            edgeTo[v] = i;
+                            id[i] = id[v]; // I am keeping this instead of id[v]=id[i] since I hope to have the same
+                            // id for all the connected nodes
                         }
                     } else if (id[i] == to) {
                         tempDistance = DistTo[i] + DistTo[v] + 1;
@@ -627,10 +637,11 @@ public class SAP {
                             while (!fromQueue.isEmpty()) fromQueue.dequeue();
                             while (!toQueue.isEmpty()) toQueue.dequeue();
                         }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                        if (DistTo[i] + 1 <= DistTo[v]) {
+                            DistTo[v] = DistTo[i] + 1;
+                            edgeTo[v] = i;
+                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
+                            // id for all the connected nodes
                         }
                     }
                 }
