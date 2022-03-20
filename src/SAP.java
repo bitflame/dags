@@ -33,6 +33,7 @@ public class SAP {
     private static final int INFINITY = Integer.MAX_VALUE;
     private final boolean print = false;
     ST<Integer, Integer> st;
+    private int[] sz;
 
     // constructor takes a digraph ( not necessarily a DAG )
     public SAP(Digraph digraph) {
@@ -80,11 +81,6 @@ public class SAP {
         onStack[v] = false;
         reversePost.push(v);
         // postOrder.enqueue(v);
-    }
-
-
-    private boolean stronglyConnected(int v, int w) {
-        return id[v] == id[w];
     }
 
     private Iterable<Integer> cycle() {
@@ -267,19 +263,46 @@ public class SAP {
         return ((x == from && y == to) || (x == to && y == from));
     }
 
+    private int find(int p) {
+        while (p != id[p]) p = id[p];
+        return p;
+    }
+
+    private void union(int p, int q) {
+        int i = find(p);
+        int j = find(q);
+        if (i == j) return;
+        if (sz[i] < sz[j]) {
+            id[i] = j;
+            sz[j] += sz[i];
+        } else {
+            id[j] = i;
+            sz[i] += sz[j];
+        }
+        count--;
+    }
+
+    private boolean connected(int p, int q) {
+        return find(p) == find(q);
+    }
+
     private void lockStepBFS() {
+        sz = new int[n];
         marked = new boolean[n];
+        onToStack = new boolean[n];
+        onFromStack = new boolean[n];
         edgeTo = new int[n];
         id = new int[n];
         for (int i = 0; i < n; i++) {
             id[i] = i;
             edgeTo[i] = i;
+            sz[i] = 1;
         }
         DistTo = new int[n];
         fromQueue = new Queue<>();
         toQueue = new Queue<>();
-        fromStack = new edu.princeton.cs.algs4.Stack<>();
-        toStack = new edu.princeton.cs.algs4.Stack<>();
+        fromStack = new Stack<>();
+        toStack = new Stack<>();
         marked[from] = true;
         marked[to] = true;
         fromQueue.enqueue(from);
@@ -292,7 +315,7 @@ public class SAP {
         int tempDistance = 0;
         while (!fromQueue.isEmpty() || !toQueue.isEmpty()) {
             // take from the one with less distance
-            if (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
+            if (!fromQueue.isEmpty() && !toQueue.isEmpty()) { // first block
                 if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
                     v = fromQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
@@ -301,81 +324,45 @@ public class SAP {
                             fromQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
-                            id[i] = id[v];
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                ancestor = i;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            }
-                        } else if (id[i] == to) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
-                                ancestor = i;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
+                            id[v] = id[i];
+                            sz[i]++;
+                        } else {
+                            // union(v, i);found a marked node union it with v
+                            union(v, i);
+                            if (connected(from, to)) {
+                                tempDistance = DistTo[v] + DistTo[i] + 1;
+                                if (tempDistance < currentDistance) {
+                                    currentDistance = tempDistance;
+                                    minDistance = currentDistance;
+                                    ancestor = i;
+                                } else {
+                                    return;
+                                }
                             }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
+                            fromQueue.enqueue(i);
                             marked[i] = true;
                             onFromStack[i] = true;
                             fromStack.push(i);
-                            DistTo[v] = DistTo[i] + 1;
+                            DistTo[i] = DistTo[v] + 1; // might have to change this to: DistTo[i]=DistTo[v]-1;
                             edgeTo[v] = i;
-                            id[i] = id[v];
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                //ancestor = i;
-                                ancestor = v;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[i] + 1 <= DistTo[v]) {
-                                DistTo[v] = DistTo[i] + 1;
-                                edgeTo[v] = i;
-                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                                // id for all the connected nodes
-                            }
-                        } else if (id[i] == to) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
-                                ancestor = v;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[i] + 1 <= DistTo[v]) {
-                                DistTo[v] = DistTo[i] + 1;
-                                edgeTo[v] = i;
-                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                                // id for all the connected nodes
+                            id[v] = id[i];
+                            sz[i]++;
+                        } else {
+                            // union(v, i);found a marked node union it with v
+                            union(v, i);
+                            if (connected(from, to)) {
+                                tempDistance = DistTo[v] + DistTo[i] + 1;
+                                if (tempDistance < currentDistance) {
+                                    currentDistance = tempDistance;
+                                    minDistance = currentDistance;
+                                    ancestor = i;
+                                } else {
+                                    return;
+                                }
                             }
                         }
                     }
@@ -387,83 +374,45 @@ public class SAP {
                             toQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
-                            id[i] = id[v];
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                ancestor = i;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
-                            }
-                        } else if (id[i] == from) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
-                                ancestor = i;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[v] + 1 <= DistTo[i]) {
-                                DistTo[i] = DistTo[v] + 1;
-                                edgeTo[i] = v;
-                                id[i] = id[v];
+                            id[v] = id[i];
+                            sz[i]++;
+                        } else {
+                            // union(v, i);found a marked node union it with v
+                            union(v, i);
+                            if (connected(from, to)) {
+                                tempDistance = DistTo[v] + DistTo[i] + 1;
+                                if (tempDistance < currentDistance) {
+                                    currentDistance = tempDistance;
+                                    minDistance = currentDistance;
+                                    ancestor = i;
+                                } else {
+                                    return;
+                                }
                             }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                         if (!marked[i]) {
+                            toQueue.enqueue(i);
                             marked[i] = true;
                             onToStack[i] = true;
                             toStack.push(i);
-                            DistTo[v] = DistTo[i] + 1;
+                            DistTo[i] = DistTo[v] + 1;
                             edgeTo[v] = i;
-                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                            // id for all the connected nodes
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                // ancestor = i;
-                                ancestor = v;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[i] + 1 <= DistTo[v]) {
-                                DistTo[v] = DistTo[i] + 1;
-                                edgeTo[v] = i;
-                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                                // id for all the connected nodes
-                            }
-                        } else if (id[i] == from) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance <= currentDistance) {
-                                // ancestor = i;
-                                ancestor = v;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                            if (DistTo[i] + 1 <= DistTo[v]) {
-                                DistTo[v] = DistTo[i] + 1;
-                                edgeTo[v] = i;
-                                id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                                // id for all the connected nodes
+                            id[v] = id[i];
+                            sz[i]++;
+                        } else {
+                            // union(v, i);found a marked node union it with v
+                            union(v, i);
+                            if (connected(from, to)) {
+                                tempDistance = DistTo[v] + DistTo[i] + 1;
+                                if (tempDistance < currentDistance) {
+                                    currentDistance = tempDistance;
+                                    minDistance = currentDistance;
+                                    ancestor = i;
+                                } else {
+                                    return;
+                                }
                             }
                         }
                     }
@@ -478,80 +427,45 @@ public class SAP {
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
-                        id[i] = id[v];
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            ancestor = i;
-                            currentDistance = tempDistance;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
-                    } else if (id[i] == from) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
-                            ancestor = i;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[v] + 1 < DistTo[i]) {
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                        id[v] = id[i];
+                        sz[i]++;
+                    } else {
+                        // union(v, i);found a marked node union it with v
+                        union(v, i);
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
+                            }
                         }
                     }
                 }
                 for (int i : digraphDFCopy.reverse().adj(v)) {
                     if (!marked[i]) {
                         marked[i] = true;
+                        toQueue.enqueue(i);
                         onToStack[i] = true;
                         toStack.push(i);
-                        DistTo[v] = DistTo[i] + 1;
+                        DistTo[i] = DistTo[v] + 1;
                         edgeTo[v] = i;
-                        id[i] = id[v];
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            // ancestor = i;
-                            ancestor = v;
-                            currentDistance = tempDistance;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[i] + 1 <= DistTo[v]) {
-                            DistTo[v] = DistTo[i] + 1;
-                            edgeTo[v] = i;
-                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                            // id for all the connected nodes
-                        }
-                    } else if (id[i] == from) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
-                            // ancestor = i;
-                            ancestor = from;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[i] + 1 < DistTo[v]) {
-                            edgeTo[v] = i;
-                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                            // id for all the connected nodes
+                        id[v] = id[i];
+                        sz[i]++;
+                    } else {
+                        // union(v, i);found a marked node union it with v
+                        union(v, i);
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
+                            }
                         }
                     }
                 }
@@ -564,84 +478,45 @@ public class SAP {
                         fromQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
-                        id[i] = id[v];
-
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor - when there is a cycle the real distance is
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            ancestor = i;
-                            currentDistance = tempDistance;
-                            minDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
-                    } else if (id[i] == to) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
-                            ancestor = i;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
+                        id[v] = id[i];
+                        sz[i]++;
+                    } else {
+                        // union(v, i);found a marked node union it with v
+                        union(v, i);
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
+                            }
                         }
                     }
                 }
                 for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
                     if (!marked[i]) {
                         marked[i] = true;
+                        fromQueue.enqueue(i);
                         onFromStack[i] = true;
                         fromStack.push(i);
-                        DistTo[v] = DistTo[i] + 1;
+                        DistTo[i] = DistTo[v] + 1;
                         edgeTo[v] = i;
-                        id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                        // id for all the connected nodes
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor - when there is a cycle the real distance is
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            // ancestor = i;
-                            ancestor = v;
-                            currentDistance = tempDistance;
-                            minDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[i] + 1 <= DistTo[v]) {
-                            DistTo[v] = DistTo[i] + 1;
-                            // maybe I should build a method to update the distance to all of v's children?
-                            edgeTo[v] = i;
-                            id[i] = id[v]; // I am keeping this instead of id[v]=id[i] since I hope to have the same
-                            // id for all the connected nodes
-                        }
-                    } else if (id[i] == to) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance <= currentDistance) {
-                            ancestor = i;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                        if (DistTo[i] + 1 <= DistTo[v]) {
-                            DistTo[v] = DistTo[i] + 1;
-                            edgeTo[v] = i;
-                            id[i] = id[v];// I am keeping this instead of id[v]=id[i] since I hope to have the same
-                            // id for all the connected nodes
+                        id[v] = id[i];
+                        sz[i]++;
+                    } else {
+                        // union(v, i);found a marked node union it with v
+                        union(v, i);
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
+                            }
                         }
                     }
                 }

@@ -20,6 +20,19 @@ public class AutoGraderTests {
     List<Integer> v;
     List<Integer> w;
 
+    private void testRandomDigraph() {
+        in = new edu.princeton.cs.algs4.In("randomDigraph.txt");
+        digraph = new edu.princeton.cs.algs4.Digraph(in);
+        sap = new SAP(digraph);
+        shortestDistance = sap.length(1, 4);
+        if (shortestDistance != 2)
+            System.out.printf("shortest distance between 1, and 4 should be 2, but it is: %d \n", shortestDistance);
+        ancestor = sap.ancestor(1, 4);
+        if (ancestor != 3)
+            System.out.printf("The ancestor between 1 and 4 in random Digraphs should be 3, but it is: %d\n", ancestor);
+
+    }
+
     private void testDigraphWordNet() {
         StdOut.println(
                 "-------------------------- Running AutoGrader Tests for DigraphWordNet --------------------------");
@@ -54,11 +67,6 @@ public class AutoGraderTests {
             System.out.printf("shortest distance between 2657, and 55738 should be 15, but it is: %d\n ",
                     shortestDistance);
         else System.out.println("Test 5 - 2657, 55738 passed ");
-    }
-
-    private void testSubgraphs() {
-        StdOut.println(
-                "--------------------------- Running AutoGrader Tests for SubGraphs ------------------------------");
     }
 
     private void testDigraph1() {
@@ -657,8 +665,9 @@ public class AutoGraderTests {
 
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
-        //autoGraderTests.troubleShooting();
+        autoGraderTests.troubleShooting();
         // autoGraderTests.testDigraphWordNet();
+        autoGraderTests.testRandomDigraph();
         autoGraderTests.testDigraph1();
         autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
