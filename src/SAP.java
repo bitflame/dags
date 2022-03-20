@@ -28,7 +28,7 @@ public class SAP {
     private int[] edgeTo;
     private int[] DistTo;
     private int[] id;
-    private int count = 0;
+    private int count;
     private int hops = 0;
     private static final int INFINITY = Integer.MAX_VALUE;
     private final boolean print = false;
@@ -41,6 +41,7 @@ public class SAP {
             throw new IllegalArgumentException("Digraph value can not be null");
         digraphDFCopy = new Digraph(digraph);
         n = digraphDFCopy.V();
+        count = n;
         onStack = new boolean[n];
         // DistTo = new int[n];
         edgeTo = new int[n];
@@ -53,10 +54,10 @@ public class SAP {
             id[i] = i;
             edgeTo[i] = i;
         }
-//        for (int i = 0; i < n; i++) {
-//            if (!marked[i]) dfs(digraphDFCopy, i);
-//        }
-//        reversePostOrder();
+        for (int i = 0; i < n; i++) {
+            if (!marked[i]) dfs(digraphDFCopy, i);
+        }
+        reversePostOrder();
     }
 
     private void dfs(Digraph digraphDFCopy, int v) {
@@ -319,29 +320,26 @@ public class SAP {
                 if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
                     v = fromQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                        union(v, i);
                         if (!marked[i]) {
                             marked[i] = true;
                             fromQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
-                            id[v] = id[i];
-                            sz[i]++;
-                        } else {
-                            // union(v, i);found a marked node union it with v
-                            union(v, i);
-                            if (connected(from, to)) {
-                                tempDistance = DistTo[v] + DistTo[i] + 1;
-                                if (tempDistance < currentDistance) {
-                                    currentDistance = tempDistance;
-                                    minDistance = currentDistance;
-                                    ancestor = i;
-                                } else {
-                                    return;
-                                }
+                        }
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
                             }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
+                        union(v, i);
                         if (!marked[i]) {
                             fromQueue.enqueue(i);
                             marked[i] = true;
@@ -349,49 +347,42 @@ public class SAP {
                             fromStack.push(i);
                             DistTo[i] = DistTo[v] + 1; // might have to change this to: DistTo[i]=DistTo[v]-1;
                             edgeTo[v] = i;
-                            id[v] = id[i];
-                            sz[i]++;
-                        } else {
-                            // union(v, i);found a marked node union it with v
-                            union(v, i);
-                            if (connected(from, to)) {
-                                tempDistance = DistTo[v] + DistTo[i] + 1;
-                                if (tempDistance < currentDistance) {
-                                    currentDistance = tempDistance;
-                                    minDistance = currentDistance;
-                                    ancestor = i;
-                                } else {
-                                    return;
-                                }
+                        }
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                                // ancestor = v;
+                            } else {
+                                return;
                             }
                         }
                     }
                 } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
                     v = toQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) {  // find outgoing neighbors
+                        union(v, i);
                         if (!marked[i]) {
                             marked[i] = true;
                             toQueue.enqueue(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
-                            id[v] = id[i];
-                            sz[i]++;
-                        } else {
-                            // union(v, i);found a marked node union it with v
-                            union(v, i);
-                            if (connected(from, to)) {
-                                tempDistance = DistTo[v] + DistTo[i] + 1;
-                                if (tempDistance < currentDistance) {
-                                    currentDistance = tempDistance;
-                                    minDistance = currentDistance;
-                                    ancestor = i;
-                                } else {
-                                    return;
-                                }
+                        }
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                            } else {
+                                return;
                             }
                         }
                     }
                     for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
+                        union(v, i);
                         if (!marked[i]) {
                             toQueue.enqueue(i);
                             marked[i] = true;
@@ -399,20 +390,16 @@ public class SAP {
                             toStack.push(i);
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[v] = i;
-                            id[v] = id[i];
-                            sz[i]++;
-                        } else {
-                            // union(v, i);found a marked node union it with v
-                            union(v, i);
-                            if (connected(from, to)) {
-                                tempDistance = DistTo[v] + DistTo[i] + 1;
-                                if (tempDistance < currentDistance) {
-                                    currentDistance = tempDistance;
-                                    minDistance = currentDistance;
-                                    ancestor = i;
-                                } else {
-                                    return;
-                                }
+                        }
+                        if (connected(from, to)) {
+                            tempDistance = DistTo[v] + DistTo[i] + 1;
+                            if (tempDistance < currentDistance) {
+                                currentDistance = tempDistance;
+                                minDistance = currentDistance;
+                                ancestor = i;
+                                // ancestor = v;
+                            } else {
+                                return;
                             }
                         }
                     }
@@ -422,29 +409,26 @@ public class SAP {
                 // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
                 v = toQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                    union(v, i);
                     if (!marked[i]) {
                         marked[i] = true;
                         toQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
-                        id[v] = id[i];
-                        sz[i]++;
-                    } else {
-                        // union(v, i);found a marked node union it with v
-                        union(v, i);
-                        if (connected(from, to)) {
-                            tempDistance = DistTo[v] + DistTo[i] + 1;
-                            if (tempDistance < currentDistance) {
-                                currentDistance = tempDistance;
-                                minDistance = currentDistance;
-                                ancestor = i;
-                            } else {
-                                return;
-                            }
+                    }
+                    if (connected(from, to)) {
+                        tempDistance = DistTo[v] + DistTo[i] + 1;
+                        if (tempDistance < currentDistance) {
+                            currentDistance = tempDistance;
+                            minDistance = currentDistance;
+                            ancestor = i;
+                        } else {
+                            return;
                         }
                     }
                 }
                 for (int i : digraphDFCopy.reverse().adj(v)) {
+                    union(v, i);
                     if (!marked[i]) {
                         marked[i] = true;
                         toQueue.enqueue(i);
@@ -452,20 +436,16 @@ public class SAP {
                         toStack.push(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[v] = i;
-                        id[v] = id[i];
-                        sz[i]++;
-                    } else {
-                        // union(v, i);found a marked node union it with v
-                        union(v, i);
-                        if (connected(from, to)) {
-                            tempDistance = DistTo[v] + DistTo[i] + 1;
-                            if (tempDistance < currentDistance) {
-                                currentDistance = tempDistance;
-                                minDistance = currentDistance;
-                                ancestor = i;
-                            } else {
-                                return;
-                            }
+                    }
+                    if (connected(from, to)) {
+                        tempDistance = DistTo[v] + DistTo[i] + 1;
+                        if (tempDistance < currentDistance) {
+                            currentDistance = tempDistance;
+                            minDistance = currentDistance;
+                            ancestor = i;
+                            // ancestor = v;
+                        } else {
+                            return;
                         }
                     }
                 }
@@ -473,29 +453,26 @@ public class SAP {
             if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] <= nodeDistance) {
                 v = fromQueue.dequeue();
                 for (int i : digraphDFCopy.adj(v)) { // find the outgoing neighbors
+                    union(v, i);
                     if (!marked[i]) {
                         marked[i] = true;
                         fromQueue.enqueue(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
-                        id[v] = id[i];
-                        sz[i]++;
-                    } else {
-                        // union(v, i);found a marked node union it with v
-                        union(v, i);
-                        if (connected(from, to)) {
-                            tempDistance = DistTo[v] + DistTo[i] + 1;
-                            if (tempDistance < currentDistance) {
-                                currentDistance = tempDistance;
-                                minDistance = currentDistance;
-                                ancestor = i;
-                            } else {
-                                return;
-                            }
+                    }
+                    if (connected(from, to)) {
+                        tempDistance = DistTo[v] + DistTo[i] + 1;
+                        if (tempDistance < currentDistance) {
+                            currentDistance = tempDistance;
+                            minDistance = currentDistance;
+                            ancestor = i;
+                        } else {
+                            return;
                         }
                     }
                 }
                 for (int i : digraphDFCopy.reverse().adj(v)) { // find the incoming neighbors
+                    union(v, i);
                     if (!marked[i]) {
                         marked[i] = true;
                         fromQueue.enqueue(i);
@@ -503,20 +480,16 @@ public class SAP {
                         fromStack.push(i);
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[v] = i;
-                        id[v] = id[i];
-                        sz[i]++;
-                    } else {
-                        // union(v, i);found a marked node union it with v
-                        union(v, i);
-                        if (connected(from, to)) {
-                            tempDistance = DistTo[v] + DistTo[i] + 1;
-                            if (tempDistance < currentDistance) {
-                                currentDistance = tempDistance;
-                                minDistance = currentDistance;
-                                ancestor = i;
-                            } else {
-                                return;
-                            }
+                    }
+                    if (connected(from, to)) {
+                        tempDistance = DistTo[v] + DistTo[i] + 1;
+                        if (tempDistance < currentDistance) {
+                            currentDistance = tempDistance;
+                            minDistance = currentDistance;
+                            // ancestor = i;
+                            ancestor = i;
+                        } else {
+                            return;
                         }
                     }
                 }
