@@ -331,6 +331,15 @@ public class SAP {
                             id[i] = id[v];
                         }
                     }
+                    for (int i:digraphDFCopy.reverse().adj(v)) {
+                        if (!marked[i]){
+                            marked[i]=true;
+                            fromQueue.enqueue(i);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[v] = i;
+                            id[i] = id[v];
+                        }
+                    }
                 } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
                     v = toQueue.dequeue();
                     for (int i : digraphDFCopy.adj(v)) {
@@ -367,6 +376,15 @@ public class SAP {
                         if (DistTo[v] + 1 <= DistTo[i]) {
                             DistTo[i] = DistTo[v] + 1;
                             edgeTo[i] = v;
+                            id[i] = id[v];
+                        }
+                    }
+                    for (int i:digraphDFCopy.reverse().adj(v)) {
+                        if (!marked[i]){
+                            marked[i]=true;
+                            toQueue.enqueue(i);
+                            DistTo[i] = DistTo[v] + 1;
+                            edgeTo[v] = i;
                             id[i] = id[v];
                         }
                     }
@@ -412,6 +430,15 @@ public class SAP {
                         id[i] = id[v];
                     }
                 }
+                for (int i:digraphDFCopy.reverse().adj(v)) {
+                    if (!marked[i]){
+                        marked[i]=true;
+                        toQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[v] = i;
+                        id[i] = id[v];
+                    }
+                }
             }
             if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] <= nodeDistance) {
                 v = fromQueue.dequeue();
@@ -450,6 +477,15 @@ public class SAP {
                     if (DistTo[v] + 1 <= DistTo[i]) {
                         DistTo[i] = DistTo[v] + 1;
                         edgeTo[i] = v;
+                        id[i] = id[v];
+                    }
+                }
+                for (int i:digraphDFCopy.reverse().adj(v)) {
+                    if (!marked[i]){
+                        marked[i]=true;
+                        fromQueue.enqueue(i);
+                        DistTo[i] = DistTo[v] + 1;
+                        edgeTo[v] = i;
                         id[i] = id[v];
                     }
                 }
