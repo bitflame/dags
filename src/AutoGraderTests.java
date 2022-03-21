@@ -27,7 +27,7 @@ public class AutoGraderTests {
         digraph = new Digraph(in);
         sap = new SAP(digraph);
         shortestDistance = sap.length(1, 4);
-        if (shortestDistance != 3)
+        if (shortestDistance != 2)
             System.out.printf("shortest distance between 1, and 4 should be 2, but it is: %d \n", shortestDistance);
         ancestor = sap.ancestor(1, 4);
         if (ancestor != 3)
@@ -669,16 +669,16 @@ public class AutoGraderTests {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
         // autoGraderTests.testDigraphWordNet();
         autoGraderTests.testRandomDigraph();
-        autoGraderTests.troubleShooting();
-        autoGraderTests.testDigraph1();
-        autoGraderTests.testDigraph2();
+//        autoGraderTests.troubleShooting();
+//        autoGraderTests.testDigraph1();
+       // autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
-        autoGraderTests.testDigraph3a();
-        autoGraderTests.testDigraph4();
-        autoGraderTests.testDigraph5();
-        autoGraderTests.testDigraph6();
-        autoGraderTests.testDigraph9();
-        autoGraderTests.createTwoObjects();
-        autoGraderTests.testIterables();
+//        autoGraderTests.testDigraph3a();
+//        autoGraderTests.testDigraph4();
+//        autoGraderTests.testDigraph5();
+//        autoGraderTests.testDigraph6();
+//        autoGraderTests.testDigraph9();
+//        autoGraderTests.createTwoObjects();
+//        autoGraderTests.testIterables();
     }
 }
