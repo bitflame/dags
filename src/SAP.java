@@ -349,6 +349,92 @@ public class SAP {
         return currentDistance;
     }
 
+    private int updateFromQueueInReverse(int currentDistance) {
+        int v = fromQueue.dequeue();
+        int tempDistance = 0;
+        for (int i : digraphDFCopy.reverse().adj(v)) {
+            if (!marked[i]) {
+                marked[i] = true;
+                fromQueue.enqueue(i);
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            } else if (checkEdgeTo(i, v)) {
+                // you found an ancestor
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                if (tempDistance < currentDistance) {
+                    ancestor = i;
+                    currentDistance = tempDistance;
+                    minDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            } else if (id[i] == to) {
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
+                if (tempDistance <= currentDistance) {
+                    // System.out.printf("inside id[i]==to for %d, %d\n", from, to);
+                    ancestor = i;
+                    minDistance = tempDistance;
+                    currentDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            }
+            if (DistTo[v] + 1 <= DistTo[i]) {
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            }
+        }
+        return currentDistance;
+    }
+
+    private int updateToQueueInReverse(int currentDistance) {
+        int v = toQueue.dequeue();
+        int tempDistance = 0;
+        for (int i : digraphDFCopy.reverse().adj(v)) {
+            if (!marked[i]) {
+                marked[i] = true;
+                toQueue.enqueue(i);
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            } else if (checkEdgeTo(i, v)) {
+                // you found an ancestor
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                if (tempDistance < currentDistance) {
+                    ancestor = i;
+                    currentDistance = tempDistance;
+                    minDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            } else if (id[i] == from) {
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
+                if (tempDistance <= currentDistance) {
+                    // System.out.printf("inside id[i]==from for %d, %d\n", from, to);
+                    ancestor = i;
+                    minDistance = tempDistance;
+                    currentDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            }
+            if (DistTo[v] + 1 <= DistTo[i]) {
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            }
+        }
+        return currentDistance;
+    }
+
     private void lockStepBFS() {
         marked = new boolean[n];
         edgeTo = new int[n];
@@ -372,7 +458,6 @@ public class SAP {
         DistTo[from] = 0;
         DistTo[to] = 0;
         int nodeDistance = 1;
-        int v = 0;
         int currentDistance = INFINITY;
         while (!fromQueue.isEmpty() || !toQueue.isEmpty()) {
             // take from the one with less distance
@@ -386,6 +471,39 @@ public class SAP {
                 currentDistance = updateFromQueue(currentDistance);
             } else if (!toQueue.isEmpty() && DistTo[toQueue.peek()] < nodeDistance) {
                 currentDistance = updateToQueue(currentDistance);
+            }
+            nodeDistance++;
+        }
+        // Calculate the distance for reverse graph
+        marked = new boolean[n];
+        edgeTo = new int[n];
+        id = new int[n];
+        for (int i = 0; i < n; i++) {
+            id[i] = i;
+            edgeTo[i] = i;
+        }
+        DistTo = new int[n];
+        fromQueue = new Queue<>();
+        toQueue = new Queue<>();
+        marked[from] = true;
+        marked[to] = true;
+        fromQueue.enqueue(from);
+        toQueue.enqueue(to);
+        DistTo[from] = 0;
+        DistTo[to] = 0;
+        nodeDistance = 1;
+        while (!fromQueue.isEmpty() || !toQueue.isEmpty()) {
+            // take from the one with less distance
+            if (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
+                if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
+                    currentDistance = updateFromQueueInReverse(currentDistance);
+                } else if (DistTo[toQueue.peek()] <= nodeDistance) {
+                    currentDistance = updateToQueueInReverse(currentDistance);
+                }
+            } else if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] < nodeDistance) {
+                currentDistance = updateFromQueueInReverse(currentDistance);
+            } else if (!toQueue.isEmpty() && DistTo[toQueue.peek()] < nodeDistance) {
+                currentDistance = updateToQueueInReverse(currentDistance);
             }
             nodeDistance++;
         }
