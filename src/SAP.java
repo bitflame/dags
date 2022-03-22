@@ -1,4 +1,8 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.ST;
+import edu.princeton.cs.algs4.In;
 
 import java.util.Iterator;
 
@@ -245,7 +249,7 @@ public class SAP {
     /* y is x's current parent. The one that is supposed to be updated edgeTo but is not so we don't lose track of the
      * previous edgeTo */
     private boolean checkEdgeTo(int x, int y) {
-        // System.out.printf("checkEdge activated for %d and %d from is: %d and to is: %d \n.", x, y, from, to);
+        // System.out.printf("************checkEdge activated for %d %d ********************\n.", from, to);
         hops = 0;
         // x should have a path to one end and its parent to the other end
         for (; x != from && x != to; x = edgeTo[x]) {
@@ -257,6 +261,92 @@ public class SAP {
             hops++;
         }
         return ((x == from && y == to) || (x == to && y == from));
+    }
+
+    private int updateFromQueue(int currentDistance) {
+        int v = fromQueue.dequeue();
+        int tempDistance = 0;
+        for (int i : digraphDFCopy.adj(v)) {
+            if (!marked[i]) {
+                marked[i] = true;
+                fromQueue.enqueue(i);
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            } else if (checkEdgeTo(i, v)) {
+                // you found an ancestor
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                if (tempDistance < currentDistance) {
+                    ancestor = i;
+                    currentDistance = tempDistance;
+                    minDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            } else if (id[i] == to) {
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
+                if (tempDistance <= currentDistance) {
+                    // System.out.printf("inside id[i]==to for %d, %d\n", from, to);
+                    ancestor = i;
+                    minDistance = tempDistance;
+                    currentDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            }
+            if (DistTo[v] + 1 <= DistTo[i]) {
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            }
+        }
+        return currentDistance;
+    }
+
+    private int updateToQueue(int currentDistance) {
+        int v = toQueue.dequeue();
+        int tempDistance = 0;
+        for (int i : digraphDFCopy.adj(v)) {
+            if (!marked[i]) {
+                marked[i] = true;
+                toQueue.enqueue(i);
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            } else if (checkEdgeTo(i, v)) {
+                // you found an ancestor
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                if (tempDistance < currentDistance) {
+                    ancestor = i;
+                    currentDistance = tempDistance;
+                    minDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            } else if (id[i] == from) {
+                tempDistance = DistTo[i] + DistTo[v] + 1;
+                // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
+                if (tempDistance <= currentDistance) {
+                    // System.out.printf("inside id[i]==from for %d, %d\n", from, to);
+                    ancestor = i;
+                    minDistance = tempDistance;
+                    currentDistance = tempDistance;
+                } else {
+                    while (!fromQueue.isEmpty()) fromQueue.dequeue();
+                    while (!toQueue.isEmpty()) toQueue.dequeue();
+                }
+            }
+            if (DistTo[v] + 1 <= DistTo[i]) {
+                DistTo[i] = DistTo[v] + 1;
+                edgeTo[i] = v;
+                id[i] = id[v];
+            }
+        }
+        return currentDistance;
     }
 
     private void lockStepBFS() {
@@ -284,171 +374,18 @@ public class SAP {
         int nodeDistance = 1;
         int v = 0;
         int currentDistance = INFINITY;
-        int tempDistance = 0;
         while (!fromQueue.isEmpty() || !toQueue.isEmpty()) {
             // take from the one with less distance
             if (!fromQueue.isEmpty() && !toQueue.isEmpty()) {
                 if (DistTo[fromQueue.peek()] < DistTo[toQueue.peek()] && DistTo[fromQueue.peek()] <= nodeDistance) {
-                    v = fromQueue.dequeue();
-                    for (int i : digraphDFCopy.adj(v)) {
-                        if (!marked[i]) {
-                            marked[i] = true;
-                            fromQueue.enqueue(i);
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                ancestor = i;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                        } else if (id[i] == to) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
-                            if (tempDistance <= currentDistance) {
-                                // System.out.printf("inside id[i]==to for %d, %d\n", from, to);
-                                ancestor = i;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
-                    }
-                } else if (DistTo[toQueue.peek()] < DistTo[fromQueue.peek()] && DistTo[toQueue.peek()] <= nodeDistance) {
-                    v = toQueue.dequeue();
-                    for (int i : digraphDFCopy.adj(v)) {
-                        if (!marked[i]) {
-                            marked[i] = true;
-                            toQueue.enqueue(i);
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        } else if (checkEdgeTo(i, v)) {
-                            // you found an ancestor
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            if (tempDistance < currentDistance) {
-                                ancestor = i;
-                                currentDistance = tempDistance;
-                                minDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                        } else if (id[i] == from) {
-                            tempDistance = DistTo[i] + DistTo[v] + 1;
-                            // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
-                            if (tempDistance <= currentDistance) {
-                                // System.out.printf("inside id[i]==from for %d, %d\n", from, to);
-                                ancestor = i;
-                                minDistance = tempDistance;
-                                currentDistance = tempDistance;
-                            } else {
-                                while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                                while (!toQueue.isEmpty()) toQueue.dequeue();
-                            }
-                        }
-                        if (DistTo[v] + 1 <= DistTo[i]) {
-                            DistTo[i] = DistTo[v] + 1;
-                            edgeTo[i] = v;
-                            id[i] = id[v];
-                        }
-                    }
+                    currentDistance = updateFromQueue(currentDistance);
+                } else if (DistTo[toQueue.peek()] <= nodeDistance) {
+                    currentDistance = updateToQueue(currentDistance);
                 }
-            }
-            if (!toQueue.isEmpty() && DistTo[toQueue.peek()] <= nodeDistance) {
-                // if the nodes in toQueue and fromQueue are equal in all the above conditions, just take one
-                v = toQueue.dequeue();
-                for (int i : digraphDFCopy.adj(v)) {
-                    if (!marked[i]) {
-                        marked[i] = true;
-                        toQueue.enqueue(i);
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            ancestor = i;
-                            currentDistance = tempDistance;
-                            minDistance = DistTo[i] + DistTo[v] + 1;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                    } else if (id[i] == from) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
-                        if (tempDistance <= currentDistance) {
-                            // System.out.printf("inside id[i]==from for %d, %d\n", from, to);
-                            ancestor = i;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                    }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-                    }
-                }
-            }
-            if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] <= nodeDistance) {
-                v = fromQueue.dequeue();
-                for (int i : digraphDFCopy.adj(v)) {
-                    if (!marked[i]) {
-                        marked[i] = true;
-                        fromQueue.enqueue(i);
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-
-                    } else if (checkEdgeTo(i, v)) {
-                        // you found an ancestor - when there is a cycle the real distance is
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        if (tempDistance < currentDistance) {
-                            ancestor = i;
-                            currentDistance = tempDistance;
-                            minDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                    } else if (id[i] == to) {
-                        tempDistance = DistTo[i] + DistTo[v] + 1;
-                        // System.out.printf("Might be in a cycle for %d, %d\n",from, to);
-                        if (tempDistance <= currentDistance) {
-                            // System.out.printf("inside id[i]==to for %d %d\n", from, to);
-                            ancestor = i;
-                            minDistance = tempDistance;
-                            currentDistance = tempDistance;
-                        } else {
-                            while (!fromQueue.isEmpty()) fromQueue.dequeue();
-                            while (!toQueue.isEmpty()) toQueue.dequeue();
-                        }
-                    }
-                    if (DistTo[v] + 1 <= DistTo[i]) {
-                        DistTo[i] = DistTo[v] + 1;
-                        edgeTo[i] = v;
-                        id[i] = id[v];
-                    }
-                }
+            } else if (!fromQueue.isEmpty() && DistTo[fromQueue.peek()] < nodeDistance) {
+                currentDistance = updateFromQueue(currentDistance);
+            } else if (!toQueue.isEmpty() && DistTo[toQueue.peek()] < nodeDistance) {
+                currentDistance = updateToQueue(currentDistance);
             }
             nodeDistance++;
         }
@@ -456,7 +393,6 @@ public class SAP {
             minDistance = -1;
             ancestor = -1;
         }
-        //StdOut.println("This graph has cycle: " + hasCycle() + " and the ancestor is: " + ancestor + " for " + from + " and " + to + "and the cycle root is: " + cycle.iterator().next());
     }
 
     public static void main(String[] args) {

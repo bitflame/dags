@@ -667,18 +667,18 @@ public class AutoGraderTests {
 
     public static void main(String[] args) {
         AutoGraderTests autoGraderTests = new AutoGraderTests();
-        // autoGraderTests.testDigraphWordNet();
-        autoGraderTests.testRandomDigraph();
-//        autoGraderTests.troubleShooting();
-//        autoGraderTests.testDigraph1();
-       // autoGraderTests.testDigraph2();
+        //autoGraderTests.testDigraphWordNet();
+        //autoGraderTests.testRandomDigraph();
+        //autoGraderTests.troubleShooting();
+        autoGraderTests.testDigraph1();
+        autoGraderTests.testDigraph2();
         autoGraderTests.testDigraph3();
-//        autoGraderTests.testDigraph3a();
-//        autoGraderTests.testDigraph4();
-//        autoGraderTests.testDigraph5();
-//        autoGraderTests.testDigraph6();
-//        autoGraderTests.testDigraph9();
-//        autoGraderTests.createTwoObjects();
-//        autoGraderTests.testIterables();
+        autoGraderTests.testDigraph3a();
+        autoGraderTests.testDigraph4();
+        autoGraderTests.testDigraph5();
+        autoGraderTests.testDigraph6();
+        autoGraderTests.testDigraph9();
+        autoGraderTests.createTwoObjects();
+        autoGraderTests.testIterables();
     }
 }
